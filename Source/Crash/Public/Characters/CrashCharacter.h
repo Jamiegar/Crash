@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "GameplayTagContainer.h"
 #include "GameplayEffectTypes.h"
 #include "AbilitySystemInterface.h"
 #include "CrashCharacter.generated.h"
+
+
+class UCrashGameplayAbility;
 
 UCLASS()
 class CRASH_API ACrashCharacter : public ACharacter, public IAbilitySystemInterface
@@ -31,18 +33,23 @@ protected:
 	TSubclassOf<class UGameplayEffect> DefaultAttributeEffect;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Abilities")
-	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
+	TArray<TSubclassOf<UCrashGameplayAbility>> DefaultAbilities;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Getter="GetAbilitySystemComponent", Category= "Abilities")
+	UAbilitySystemComponent* AbilityComponent;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
+	virtual void OnStartedFalling();
+	virtual void Landed(const FHitResult& Hit) override;
+	
 private:
-	UPROPERTY(VisibleAnywhere, Category= "Abilities")
-	UAbilitySystemComponent* AbilityComponent;
 
 	UPROPERTY()
 	class UCrashAttributeSet* Attributes;
+	
 
 
 	

@@ -2,7 +2,11 @@
 
 
 #include "Characters/CrashCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/CrashAttributeSet.h"
+#include "GAS/Abiliities/Movement/JumpAbility.h"
+#include "GAS/Effects/AirborneEffect.h"
+#include "GAS/Effects/GroundedEffect.h"
 
 
 // Sets default values
@@ -11,8 +15,15 @@ ACrashCharacter::ACrashCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	bUseControllerRotationYaw = false;
+
 	AbilityComponent = CreateDefaultSubobject<UAbilitySystemComponent>("Ability Component");
 	Attributes = CreateDefaultSubobject<UCrashAttributeSet>("Attributes");
+
+	DefaultAbilities.Add(UJumpAbility::StaticClass());
+
+	JumpMaxCount = 2;
 }
 
 UAbilitySystemComponent* ACrashCharacter::GetAbilitySystemComponent() const
@@ -25,6 +36,37 @@ void ACrashCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 }
+
+void ACrashCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+{
+	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_Falling:
+		OnStartedFalling();
+		break;
+
+		default:
+			return;
+	}
+}
+
+void ACrashCharacter::OnStartedFalling()
+{
+	const UAirborneEffect* Effect = NewObject<UAirborneEffect>();
+	const FGameplayEffectContextHandle ContextHandle = FGameplayEffectContextHandle();
+	GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(Effect, 0, ContextHandle);
+}
+
+void ACrashCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	const UGroundedEffect* Effect = NewObject<UGroundedEffect>();
+	const FGameplayEffectContextHandle ContextHandle = FGameplayEffectContextHandle();
+	GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(Effect, 0, ContextHandle);
+}
+
 
 // Called every frame
 void ACrashCharacter::Tick(float DeltaTime)
@@ -63,7 +105,7 @@ void ACrashCharacter::GiveDefaultAbilities()
 	
 	for (auto StartAbility : DefaultAbilities)
 	{
-		AbilityComponent->GiveAbility(FGameplayAbilitySpec(StartAbility.GetDefaultObject(), 1, 0));
+		AbilityComponent->GiveAbility(FGameplayAbilitySpec(StartAbility.GetDefaultObject(), 1, StartAbility.GetDefaultObject()->AbilityInputID));
 	}
 }
 
