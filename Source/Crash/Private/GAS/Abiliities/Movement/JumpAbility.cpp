@@ -4,12 +4,12 @@
 #include "GAS/Abiliities/Movement/JumpAbility.h"
 #include "AbilitySystemComponent.h"
 #include "Characters/CrashCharacter.h"
+#include "GAS/Effects/JumpEffect.h"
 
 
 UJumpAbility::UJumpAbility()
 {
 	AbilityInputID = MovementJump;
-	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.MovementAction.Jump")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.MovementAction.JumpExhausted")));
 }
 
@@ -20,13 +20,15 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 	
 	if(ACrashCharacter* Character = Cast<ACrashCharacter>(GetActorInfo().OwnerActor))
 	{
+		if(Character->GetCrashAttributeSet()->GetNumberOfJumps() <= 0)
+		{
+			ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.MovementAction.JumpExhausted")));
+			return;
+		}
+		
 		Character->Jump();
 		CommitAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef());
-
-		//const UAirborneEffect* Effect = UAirborneEffect::StaticClass()->GetDefaultObject<UAirborneEffect>();
-		//const FActiveGameplayEffectHandle EffectHandle = ApplyGameplayEffectToOwner(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), Effect,1, 1);
-
-
+		Character->ApplyEffectToCrashCharacter(UJumpEffect::StaticClass());
 		EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef(), true, false);
 		
 	}

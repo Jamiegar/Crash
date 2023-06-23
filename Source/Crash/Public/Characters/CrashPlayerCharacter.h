@@ -7,6 +7,7 @@
 #include "CrashPlayerCharacter.generated.h"
 
 
+class UInputConfig;
 class UInputMappingContext;
 
 USTRUCT(DisplayName="Default Mapping Context Data", BlueprintType)
@@ -34,11 +35,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Input")
 	TArray<FMappingContextData> DefaultInputMappings;
 	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Input|Actions|Movement")
-	UInputAction* MoveLeftRightAction;
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	UInputConfig* InputConfig;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Input|Actions|Movement")
-	UInputAction* JumpAction;
+	UInputAction* MoveLeftRightAction;
 	
 	virtual void BeginPlay() override; // Called when the game starts or when spawned
 	void SetupCameraView() const;
@@ -49,9 +50,7 @@ protected:
 	
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

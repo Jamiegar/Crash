@@ -62,9 +62,8 @@ void ACrashCharacter::OnStartedFalling()
 void ACrashCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
-	const UGroundedEffect* Effect = NewObject<UGroundedEffect>();
-	const FGameplayEffectContextHandle ContextHandle = FGameplayEffectContextHandle();
-	GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(Effect, 0, ContextHandle);
+
+	ApplyEffectToCrashCharacter(UGroundedEffect::StaticClass());
 }
 
 
@@ -89,12 +88,7 @@ void ACrashCharacter::InitializeAttributes()
 {
 	if(AbilityComponent && DefaultAttributeEffect)
 	{
-		FGameplayEffectContextHandle EffectContext = AbilityComponent->MakeEffectContext();
-		EffectContext.AddSourceObject(this);
-		const FGameplayEffectSpecHandle SpecHandle = AbilityComponent->MakeOutgoingSpec(DefaultAttributeEffect, 1, EffectContext);
-
-		if(SpecHandle.IsValid())
-			FActiveGameplayEffectHandle GEHandle = AbilityComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		ApplyEffectToCrashCharacter(DefaultAttributeEffect);
 	}
 }
 
@@ -107,5 +101,15 @@ void ACrashCharacter::GiveDefaultAbilities()
 	{
 		AbilityComponent->GiveAbility(FGameplayAbilitySpec(StartAbility.GetDefaultObject(), 1, StartAbility.GetDefaultObject()->AbilityInputID));
 	}
+}
+
+void ACrashCharacter::ApplyEffectToCrashCharacter(TSubclassOf<UGameplayEffect> Effect) const
+{
+	FGameplayEffectContextHandle EffectContext = AbilityComponent->MakeEffectContext();
+	EffectContext.AddSourceObject(this);
+	const FGameplayEffectSpecHandle SpecHandle = AbilityComponent->MakeOutgoingSpec(Effect, 1, EffectContext);
+	
+	if(SpecHandle.IsValid())
+		FActiveGameplayEffectHandle GEHandle = AbilityComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 }
 

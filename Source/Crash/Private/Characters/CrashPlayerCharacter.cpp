@@ -1,10 +1,10 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Characters/CrashPlayerCharacter.h"
-
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
+#include "Characters/Input/CrashEnhancedInputComponent.h"
+#include "GAS/CrashGameplayTags.h"
 #include "GAS/Abiliities/Movement/JumpAbility.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Subsystems/CameraSubsystem.h"
@@ -63,29 +63,28 @@ void ACrashPlayerCharacter::JumpActivate(const FInputActionValue& Value)
 	//GetAbilitySystemComponent()->TryActivateAbility(*AbilitySpecHandle);
 
 	GetAbilitySystemComponent()->AbilityLocalInputPressed(EAbilityInputID::MovementJump);
+	
 }
 
 void ACrashPlayerCharacter::JumpCompleted(const FInputActionValue& Value)
 {
-	GetAbilitySystemComponent()->AbilityLocalInputReleased(EAbilityInputID::MovementJump);
+	if(GetAbilitySystemComponent()->HasActivatableTriggeredAbility(FGameplayTag::RequestGameplayTag(FName("Player.MovementAction.Jump"))))
+		GetAbilitySystemComponent()->AbilityLocalInputReleased(EAbilityInputID::MovementJump);
 }
 
-// Called every frame
-void ACrashPlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
 
 // Called to bind functionality to input
 void ACrashPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	
+	if(UCrashEnhancedInputComponent* CrashInputComponent = CastChecked<UCrashEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(MoveLeftRightAction, ETriggerEvent::Triggered, this, &ACrashPlayerCharacter::Move);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACrashPlayerCharacter::JumpActivate);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACrashPlayerCharacter::JumpCompleted);
+		const FCrashGameplayTags& GameplayTags = FCrashGameplayTags::Get();
+		
+		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Movement, ETriggerEvent::Triggered, this, &ACrashPlayerCharacter::Move);
+		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Jump, ETriggerEvent::Started, this, &ACrashPlayerCharacter::JumpActivate);
+		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Jump, ETriggerEvent::Completed, this, &ACrashPlayerCharacter::JumpCompleted);
 	}
 }
 
