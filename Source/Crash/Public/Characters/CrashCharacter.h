@@ -13,7 +13,7 @@
 class UCrashAttributeSet;
 class UCrashGameplayAbility;
 
-UCLASS()
+UCLASS(Abstract)
 class CRASH_API ACrashCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
@@ -21,18 +21,19 @@ class CRASH_API ACrashCharacter : public ACharacter, public IAbilitySystemInterf
 public:
 	// Sets default values for this character's properties
 	ACrashCharacter();
+	void SetDefaultMesh();
+	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void InitializeAttributes();
 	virtual void GiveDefaultAbilities();
 	
 	void ApplyEffectToCrashCharacter(TSubclassOf<UGameplayEffect> Effect) const;
-	
 	UCrashAttributeSet* GetCrashAttributeSet() const { return Attributes; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetCharacterSpeed() { return GetVelocity().Length(); }
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Abilities")
 	TSubclassOf<class UGameplayEffect> DefaultAttributeEffect;
@@ -59,11 +60,12 @@ protected:
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
 	virtual void OnStartedFalling();
 	virtual void Landed(const FHitResult& Hit) override;
+	virtual void SetUpDefaultMovementValues();
 	
 private:
 
 	UPROPERTY()
-	class UCrashAttributeSet* Attributes;
+	UCrashAttributeSet* Attributes;
 	
 
 
