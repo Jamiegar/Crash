@@ -6,7 +6,6 @@
 #include "AbilitySystemComponent.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
-#include "GAS/CrashAttributeSet.h"
 #include "CrashCharacter.generated.h"
 
 
@@ -21,19 +20,20 @@ class CRASH_API ACrashCharacter : public ACharacter, public IAbilitySystemInterf
 public:
 	// Sets default values for this character's properties
 	ACrashCharacter();
-	void SetDefaultMesh();
+	void SetDefaultMesh() const;
 	
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilityComponent; };
+	UCrashAttributeSet* GetCrashAttributeSet() const { return Attributes; }
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void InitializeAttributes();
 	virtual void GiveDefaultAbilities();
 	
 	void ApplyEffectToCrashCharacter(TSubclassOf<UGameplayEffect> Effect) const;
-	UCrashAttributeSet* GetCrashAttributeSet() const { return Attributes; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetCharacterSpeed() { return GetVelocity().Length(); }
+	
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Abilities")
 	TSubclassOf<class UGameplayEffect> DefaultAttributeEffect;
@@ -45,7 +45,7 @@ protected:
 	UAbilitySystemComponent* AbilityComponent;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Attributes")
-	int NumberOfJumps = 3;
+	int NumberOfJumps = 2;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Attributes")
 	int Lives = 3;
@@ -53,10 +53,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Attributes")
 	float PercentageLife = 0;
 	
-	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
 	virtual void OnStartedFalling();
 	virtual void Landed(const FHitResult& Hit) override;

@@ -4,7 +4,9 @@
 #include "GAS/Abiliities/Movement/JumpAbility.h"
 #include "AbilitySystemComponent.h"
 #include "Characters/CrashCharacter.h"
+#include "GAS/CrashAttributeSet.h"
 #include "GAS/Effects/JumpEffect.h"
+#include "GAS/Effects/JumpExhaustedEffect.h"
 
 
 UJumpAbility::UJumpAbility()
@@ -20,17 +22,16 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 	
 	if(ACrashCharacter* Character = Cast<ACrashCharacter>(GetActorInfo().OwnerActor))
 	{
-		if(Character->GetCrashAttributeSet()->GetNumberOfJumps() <= 0)
-		{
-			ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.MovementAction.JumpExhausted")));
-			return;
-		}
 		
 		Character->Jump();
 		CommitAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef());
 		Character->ApplyEffectToCrashCharacter(UJumpEffect::StaticClass());
 		EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef(), true, false);
-		
+
+		if(Character->GetCrashAttributeSet()->GetNumberOfJumps() <= 0)
+		{
+			Character->ApplyEffectToCrashCharacter(UJumpExhaustedEffect::StaticClass());
+		}
 	}
 }
 

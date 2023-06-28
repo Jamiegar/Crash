@@ -7,7 +7,7 @@
 #include "CrashGameplayAbility.generated.h"
 
 
-UENUM()
+UENUM(BlueprintType)
 enum EAbilityInputID
 {
 	None = 0,
@@ -18,6 +18,13 @@ enum EAbilityInputID
 	BasicAttackDown
 };
 
+UENUM(BlueprintType)
+enum ECrashActivationPolicy : uint8
+{
+	OnInputTriggered,
+	OnSpawn
+};
+
 UCLASS()
 class CRASH_API UCrashGameplayAbility : public UGameplayAbility
 {
@@ -26,11 +33,19 @@ class CRASH_API UCrashGameplayAbility : public UGameplayAbility
 public:
 	UCrashGameplayAbility();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input", meta=(EditCondition="ActivationPolicy == ECrashActivationPolicy::OnInputTriggered"))
 	TEnumAsByte<EAbilityInputID> AbilityInputID = None;
+
+	ECrashActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
+	
+	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
 	
 	
-	
-	
+protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Crash|Ability Activation")
+	TEnumAsByte<ECrashActivationPolicy> ActivationPolicy;
+
+	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	
 };

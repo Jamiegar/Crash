@@ -12,6 +12,7 @@ class CRASH_API UJumpAbility : public UCrashGameplayAbility
 	GENERATED_BODY()
 public:
 	UJumpAbility();
-	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+		const FGameplayEventData* TriggerEventData) override;
 	
 };

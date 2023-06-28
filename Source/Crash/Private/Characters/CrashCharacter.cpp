@@ -23,38 +23,29 @@ ACrashCharacter::ACrashCharacter()
 	SetDefaultMesh();
 }
 
-void ACrashCharacter::SetDefaultMesh()
+void ACrashCharacter::SetDefaultMesh() const
 {
 	//Set the default mesh if not overriden in Blueprint
 	if(GetMesh()->GetSkeletalMeshAsset() == nullptr)
 	{
-		static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMesh
+		static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMesh //Gets the skeletal mesh from file path
 			(TEXT("/Script/Engine.SkeletalMesh'/Game/Assets/PolygonFantasyRivals/Meshes/Characters/SK_Character_SpiritDemon.SK_Character_SpiritDemon'"));
 
-		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> AnimObject 
+		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> AnimObject //Gets the Animation BP from file path
 			(TEXT("/Script/Engine.AnimBlueprint'/Game/Blueprints/Characters/Animation/AnimBP_CrashCharacter.AnimBP_CrashCharacter'"));
 
-		if(!SkeletalMesh.Succeeded() || !AnimObject.Succeeded())
+		if(!SkeletalMesh.Succeeded() || !AnimObject.Succeeded()) 
 		{
 			UE_LOG(LogTemp, Error, TEXT("Default Crash Mesh and Animation Could not be found"));
 			return;
 		}
-		
+
+		//Set mesh and animation values and initialize default position and rotation of mesh 
 		GetMesh()->SetSkeletalMeshAsset(SkeletalMesh.Object);
 		GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 		GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 		GetMesh()->SetAnimInstanceClass(AnimObject.Object->GeneratedClass);
-		
-		
-		
 	}
-
-	
-}
-
-UAbilitySystemComponent* ACrashCharacter::GetAbilitySystemComponent() const
-{
-	return AbilityComponent;
 }
 
 // Called when the game starts or when spawned
@@ -90,6 +81,7 @@ void ACrashCharacter::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 
 	ApplyEffectToCrashCharacter(UGroundedEffect::StaticClass());
+	
 }
 
 void ACrashCharacter::SetUpDefaultMovementValues()
@@ -100,19 +92,18 @@ void ACrashCharacter::SetUpDefaultMovementValues()
 		JumpMaxCount = 10;
 
 		MovementComponent->bOrientRotationToMovement = true;
-		MovementComponent->bUseSeparateBrakingFriction = true;
+		MovementComponent->bUseSeparateBrakingFriction = false;
 		MovementComponent->MaxWalkSpeed = 900.f;
-		MovementComponent->BrakingFriction = 8.f;
 		MovementComponent->GravityScale = 2.5f;
-		MovementComponent->MaxAcceleration = 10000.f;
+		MovementComponent->MaxAcceleration = 5000.f;
 		MovementComponent->JumpZVelocity = 1200.f;
 		MovementComponent->BrakingFrictionFactor = 1.f;
 		MovementComponent->BrakingDecelerationWalking = 500.f;
-		MovementComponent->BrakingDecelerationFalling = 150.f;
+		MovementComponent->BrakingDecelerationFalling = 3.f;
 		MovementComponent->AirControl = 0.2f;
-		MovementComponent->AirControlBoostMultiplier = 1.1f;
+		MovementComponent->AirControlBoostMultiplier = 0.5f;
 		MovementComponent->AirControlBoostVelocityThreshold = 1.5f;
-		MovementComponent->FallingLateralFriction = 2.0f;
+		MovementComponent->FallingLateralFriction = 1.0f;
 		MovementComponent->bApplyGravityWhileJumping = false;
 		MovementComponent->RotationRate = FRotator(0,1500.0f,0);
 	}

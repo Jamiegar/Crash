@@ -2,6 +2,8 @@
 
 
 #include "CharacterMenuBar.h"
+
+#include "CharacterDropDownMenu.h"
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "PropertyCustomizationHelpers.h"
@@ -38,7 +40,6 @@ void SCharacterMenuBar::Construct(const FArguments& InArgs)
 			.DisplayCompactSize(false)
 			.AllowClear(true)
 			.PropertyHandle()*/
-			
 
 		]
 		+SHorizontalBox::Slot()
@@ -73,10 +74,8 @@ FReply SCharacterMenuBar::OnCreateCharacterButtonClicked()
 
 TSharedRef<SWidget> SCharacterMenuBar::GenerateAssetPicker()
 {
-	const UClass* AllowedClass = Cast<UClass>(UBlueprint::StaticClass());
+	const UClass* AllowedClass = Cast<UClass>(ACharacter::StaticClass());
 	const FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser"));
-
-	UE_LOG(LogTemp, Warning, TEXT("Path Name: %s"), *AllowedClass->GetClassPathName().GetAssetName().ToString());
 	
 	FAssetPickerConfig PickerConfig;
 	PickerConfig.Filter.ClassPaths.Add(AllowedClass->GetClassPathName());
@@ -86,7 +85,8 @@ TSharedRef<SWidget> SCharacterMenuBar::GenerateAssetPicker()
 	PickerConfig.InitialAssetViewType = EAssetViewType::List;
 	PickerConfig.bAllowDragging = false;
 	PickerConfig.bCanShowFolders = true;
-
+	PickerConfig.bCanShowClasses = true;
+	
 	
 	
 	return
