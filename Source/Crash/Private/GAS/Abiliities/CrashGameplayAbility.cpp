@@ -25,4 +25,25 @@ void UCrashGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* Actor
 	Super::OnGiveAbility(ActorInfo, Spec);
 
 	TryActivateAbilityOnSpawn(ActorInfo, Spec);
+	
 }
+
+FGameplayEffectSpecHandle UCrashGameplayAbility::MakeEffectSpecHandleFromAbility(const TSubclassOf<UGameplayEffect> EffectClass) const
+{
+	const FGameplayEffectSpecHandle Handle =
+		MakeOutgoingGameplayEffectSpec(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), EffectClass);
+
+	return Handle;
+}
+
+TArray<FActiveGameplayEffectHandle> UCrashGameplayAbility::ApplyGameplayEffectSpecToTargetFromAbility(FGameplayEffectSpecHandle SpecHandle, FGameplayAbilityTargetDataHandle& TargetData) const
+{
+	auto ActiveGameplayEffectHandles =
+		ApplyGameplayEffectSpecToTarget(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), SpecHandle, TargetData);
+
+	return ActiveGameplayEffectHandles;
+}
+
+
+
+

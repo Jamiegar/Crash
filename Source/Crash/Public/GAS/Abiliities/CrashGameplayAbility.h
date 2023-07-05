@@ -25,7 +25,7 @@ enum ECrashActivationPolicy : uint8
 	OnSpawn
 };
 
-UCLASS()
+UCLASS(Abstract)
 class CRASH_API UCrashGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
@@ -35,7 +35,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input", meta=(EditCondition="ActivationPolicy == ECrashActivationPolicy::OnInputTriggered"))
 	TEnumAsByte<EAbilityInputID> AbilityInputID = None;
-
+	
 	ECrashActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
 	
 	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
@@ -47,5 +47,7 @@ protected:
 	TEnumAsByte<ECrashActivationPolicy> ActivationPolicy;
 
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
-	
+
+	FGameplayEffectSpecHandle MakeEffectSpecHandleFromAbility(const TSubclassOf<UGameplayEffect> EffectClass) const;
+	TArray<FActiveGameplayEffectHandle> ApplyGameplayEffectSpecToTargetFromAbility(FGameplayEffectSpecHandle SpecHandle, FGameplayAbilityTargetDataHandle& TargetData) const;
 };

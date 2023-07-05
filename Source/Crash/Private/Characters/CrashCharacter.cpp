@@ -2,6 +2,9 @@
 
 
 #include "Characters/CrashCharacter.h"
+#include "Characters/CombatComponents/BasicCombatComponent.h"
+#include "Characters/CombatComponents/KnockbackComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/CrashAttributeSet.h"
 #include "GAS/Abiliities/Movement/JumpAbility.h"
@@ -17,9 +20,13 @@ ACrashCharacter::ACrashCharacter()
 	ACrashCharacter::SetUpDefaultMovementValues();
 	
 	AbilityComponent = CreateDefaultSubobject<UAbilitySystemComponent>("Ability Component");
-	Attributes = CreateDefaultSubobject<UCrashAttributeSet>("Attributes");
-	DefaultAbilities.Add(UJumpAbility::StaticClass());
+	Attributes = CreateDefaultSubobject<UCrashAttributeSet>("Default Attributes");
+	BasicCombatComponent = CreateDefaultSubobject<UBasicCombatComponent>("Basic Combat Component");
+	KnockbackComponent = CreateDefaultSubobject<UKnockbackComponent>("Knockback Component");
 
+	GetCapsuleComponent()->SetCapsuleRadius(50.f);
+	
+	AddDefaultAbilities();
 	SetDefaultMesh();
 }
 
@@ -48,10 +55,23 @@ void ACrashCharacter::SetDefaultMesh() const
 	}
 }
 
+void ACrashCharacter::AddDefaultAbilities()
+{
+	DefaultAbilities.Add(UJumpAbility::StaticClass());
+	
+	if(BasicCombatComponent)
+	{
+		for (auto BasicCombat : BasicCombatComponent->BasicCombatAbilities)
+			DefaultAbilities.Add(BasicCombat);
+	}
+}
+
 // Called when the game starts or when spawned
 void ACrashCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ApplyEffectToCrashCharacter(UGroundedEffect::StaticClass());
 }
 
 void ACrashCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
@@ -109,6 +129,11 @@ void ACrashCharacter::SetUpDefaultMovementValues()
 	}
 }
 
+void ACrashCharacter::ActivateJumpAbility()
+{
+	GetAbilitySystemComponent()->TryActivateAbilityByClass(UJumpAbility::StaticClass());
+}
+
 void ACrashCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
@@ -123,9 +148,7 @@ void ACrashCharacter::PossessedBy(AController* NewController)
 void ACrashCharacter::InitializeAttributes()
 {
 	if(AbilityComponent && DefaultAttributeEffect)
-	{
 		ApplyEffectToCrashCharacter(DefaultAttributeEffect);
-	}
 }
 
 void ACrashCharacter::GiveDefaultAbilities()

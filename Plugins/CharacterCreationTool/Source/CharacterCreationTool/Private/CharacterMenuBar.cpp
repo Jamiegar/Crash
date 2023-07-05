@@ -8,7 +8,6 @@
 #include "IContentBrowserSingleton.h"
 #include "PropertyCustomizationHelpers.h"
 #include "SlateOptMacros.h"
-#include "GameFramework/Character.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -74,11 +73,11 @@ FReply SCharacterMenuBar::OnCreateCharacterButtonClicked()
 
 TSharedRef<SWidget> SCharacterMenuBar::GenerateAssetPicker()
 {
-	const UClass* AllowedClass = Cast<UClass>(ACharacter::StaticClass());
+	const UClass* AllowedClass = Cast<UClass>(UBlueprint::StaticClass());
 	const FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser"));
 	
 	FAssetPickerConfig PickerConfig;
-	PickerConfig.Filter.ClassPaths.Add(AllowedClass->GetClassPathName());
+	PickerConfig.Filter.ClassPaths.Add(FTopLevelAssetPath("/Script/Crash.CrashCharacter"));
 	PickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP(this, &SCharacterMenuBar::OnAssetSelected);
 	PickerConfig.bAllowNullSelection = true;
 	PickerConfig.Filter.bRecursiveClasses = true;
@@ -86,6 +85,7 @@ TSharedRef<SWidget> SCharacterMenuBar::GenerateAssetPicker()
 	PickerConfig.bAllowDragging = false;
 	PickerConfig.bCanShowFolders = true;
 	PickerConfig.bCanShowClasses = true;
+	
 	
 	
 	

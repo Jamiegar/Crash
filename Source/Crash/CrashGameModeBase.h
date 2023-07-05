@@ -13,5 +13,15 @@ UCLASS()
 class CRASH_API ACrashGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	int NumberOfPlayers = 2;
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+	
 	
 };

@@ -13,25 +13,33 @@ UJumpAbility::UJumpAbility()
 {
 	AbilityInputID = MovementJump;
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.MovementAction.JumpExhausted")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
 }
+
+
 
 void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                    const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 	
-	if(ACrashCharacter* Character = Cast<ACrashCharacter>(GetActorInfo().OwnerActor))
+	if(ACrashCharacter* Character = CastChecked<ACrashCharacter>(GetActorInfo().AvatarActor))
 	{
-		
-		Character->Jump();
 		CommitAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef());
-		Character->ApplyEffectToCrashCharacter(UJumpEffect::StaticClass());
-		EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef(), true, false);
 
-		if(Character->GetCrashAttributeSet()->GetNumberOfJumps() <= 0)
+		Character->Jump();
+		Character->ApplyEffectToCrashCharacter(UJumpEffect::StaticClass());
+		
+		EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef(), true, false);
+		const UCrashAttributeSet* Attributes = Character->GetCrashAttributeSet();
+		
+		if(Attributes)
 		{
-			Character->ApplyEffectToCrashCharacter(UJumpExhaustedEffect::StaticClass());
+			UE_LOG(LogTemp, Warning, TEXT("Jumps = %f"), Attributes->GetNumberOfJumps());
+			if(Attributes->GetNumberOfJumps() <= 0)
+				Character->ApplyEffectToCrashCharacter(UJumpExhaustedEffect::StaticClass());
 		}
+		
 	}
 }
 

@@ -3,6 +3,7 @@
 #include "Characters/CrashPlayerCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Characters/CombatComponents/BasicCombatComponent.h"
 #include "Characters/Input/CrashEnhancedInputComponent.h"
 #include "GAS/CrashGameplayTags.h"
 #include "GAS/Abiliities/Movement/JumpAbility.h"
@@ -19,10 +20,8 @@ ACrashPlayerCharacter::ACrashPlayerCharacter()
 	
 }
 
-// Called when the game starts or when spawned
-void ACrashPlayerCharacter::BeginPlay()
+void ACrashPlayerCharacter::InitializePlayerCharacter()
 {
-	Super::BeginPlay();
 	SetupCameraView();
 
 	// Add input mapping context to player 
@@ -57,20 +56,30 @@ void ACrashPlayerCharacter::Move(const FInputActionValue& Value)
 	AddMovementInput(ForwardDirection, AxisValue, true);
 }
 
-void ACrashPlayerCharacter::JumpActivate(const FInputActionValue& Value)
+void ACrashPlayerCharacter::JumpInputActivate(const FInputActionValue& Value)
 {
-	//const FGameplayAbilitySpecHandle* AbilitySpecHandle = AbilityMap.Find(UJumpAbility::StaticClass());
+	//const FGameplayAbilitySpecHandle* AbilitySpecHandle = 
 	//GetAbilitySystemComponent()->TryActivateAbility(*AbilitySpecHandle);
+	//GetAbilitySystemComponent()->AbilityLocalInputPressed(EAbilityInputID::MovementJump);
 
-	GetAbilitySystemComponent()->AbilityLocalInputPressed(EAbilityInputID::MovementJump);
-	
+	ActivateJumpAbility();
 }
 
-void ACrashPlayerCharacter::JumpCompleted(const FInputActionValue& Value)
+void ACrashPlayerCharacter::BasicMiddleAttackInput(const FInputActionValue& Value)
 {
-	if(GetAbilitySystemComponent()->HasActivatableTriggeredAbility(FGameplayTag::RequestGameplayTag(FName("Player.MovementAction.Jump"))))
-		GetAbilitySystemComponent()->AbilityLocalInputReleased(EAbilityInputID::MovementJump);
+	BasicCombatComponent->BasicMiddleAttack();
 }
+
+void ACrashPlayerCharacter::BasicUpAttackInput(const FInputActionValue& Value)
+{
+	BasicCombatComponent->BasicUpAttack();
+}
+
+void ACrashPlayerCharacter::BasicDownAttackInput(const FInputActionValue& Value)
+{
+	BasicCombatComponent->BasicDownAttack();
+}
+
 
 
 // Called to bind functionality to input
@@ -83,8 +92,11 @@ void ACrashPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		const FCrashGameplayTags& GameplayTags = FCrashGameplayTags::Get();
 		
 		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Movement, ETriggerEvent::Triggered, this, &ACrashPlayerCharacter::Move);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Jump, ETriggerEvent::Started, this, &ACrashPlayerCharacter::JumpActivate);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Jump, ETriggerEvent::Completed, this, &ACrashPlayerCharacter::JumpCompleted);
+		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Jump, ETriggerEvent::Started, this, &ACrashPlayerCharacter::JumpInputActivate);
+		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.LeftBasicAttack, ETriggerEvent::Completed, this, &ACrashPlayerCharacter::BasicMiddleAttackInput);
+		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.RightBasicAttack, ETriggerEvent::Completed, this, &ACrashPlayerCharacter::BasicMiddleAttackInput);
+		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.UpBasicAttack, ETriggerEvent::Completed, this, &ACrashPlayerCharacter::BasicUpAttackInput);
+		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.DownBasicAttack, ETriggerEvent::Completed, this, &ACrashPlayerCharacter::BasicDownAttackInput);
 	}
 }
 

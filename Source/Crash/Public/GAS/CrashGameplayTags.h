@@ -16,8 +16,21 @@ public:
 
 	static void InitializeTags();
 
+#pragma region MovementTags
 	FGameplayTag Movement;
 	FGameplayTag Jump;
+#pragma endregion
+#pragma region BasicCombatTags
+	FGameplayTag LeftBasicAttack;
+	FGameplayTag RightBasicAttack;
+	FGameplayTag UpBasicAttack;
+	FGameplayTag DownBasicAttack;
+#pragma endregion
+	FGameplayTag PlayerDamaged;
+	FGameplayTag ComboCount;
+	
+
+	
 protected:
 	void AddAllTags(UGameplayTagsManager& Manager);
 	void AddTag(FGameplayTag& OutTag, const ANSICHAR* TagName, const ANSICHAR* TagComment);

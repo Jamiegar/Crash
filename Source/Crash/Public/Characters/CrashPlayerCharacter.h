@@ -31,30 +31,26 @@ public:
 	// Sets default values for this character's properties
 	ACrashPlayerCharacter();
 
+	void InitializePlayerCharacter();
+
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Input")
 	TArray<FMappingContextData> DefaultInputMappings;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	UInputConfig* InputConfig;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Input|Actions|Movement")
-	UInputAction* MoveLeftRightAction;
 	
-	virtual void BeginPlay() override; // Called when the game starts or when spawned
 	void SetupCameraView() const;
 	
 	void Move(const FInputActionValue& Value);
-	void JumpActivate(const FInputActionValue& Value);
-	void JumpCompleted(const FInputActionValue& Value);
+	void JumpInputActivate(const FInputActionValue& Value);
+	void BasicMiddleAttackInput(const FInputActionValue& Value);
+	void BasicUpAttackInput(const FInputActionValue& Value);
+	void BasicDownAttackInput(const FInputActionValue& Value);
 	
-
 public:
 	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	
-
-
 };

@@ -21,19 +21,43 @@ class CRASH_API UCrashAttributeSet : public UAttributeSet
 	GENERATED_BODY()
 
 public:
+	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, NumberOfJumps);
+	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, Percentage);
+	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, Lives);
+	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, Damage);
+	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, Weight);
+	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, Knockback);
+
+	
+protected:
+
 	UCrashAttributeSet();
 	
-	UPROPERTY(BlueprintReadOnly, Category="Character Atributes")
+	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
+
+	UPROPERTY(BlueprintReadOnly, Category="Atributes|Movement", meta=(AllowPrivateAccess = true))
 	FGameplayAttributeData NumberOfJumps;
-	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, NumberOfJumps);
-
-	UPROPERTY(BlueprintReadOnly, Category="Character Atributes")
+	
+	UPROPERTY(BlueprintReadOnly, Category="Atributes|Heath / Damage", meta=(AllowPrivateAccess = true))
 	FGameplayAttributeData Percentage;
-	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, Percentage);
 
-	UPROPERTY(BlueprintReadOnly, Category="Character Atributes")
-    FGameplayAttributeData Lives;
-    ATTRIBUTE_ACCESSORS(UCrashAttributeSet, Lives);
+	UPROPERTY(BlueprintReadOnly, Category="Atributes|Heath / Damage", meta=(AllowPrivateAccess = true))
+	FGameplayAttributeData Lives;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Atributes|Heath / Damage", meta=(AllowPrivateAccess = true))
+	FGameplayAttributeData Damage;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Atributes|Heath / Damage", meta=(AllowPrivateAccess = true))
+	FGameplayAttributeData Weight;
+
+	UPROPERTY(BlueprintReadOnly, Category="Atributes|Heath / Damage", meta=(AllowPrivateAccess = true))
+	FGameplayAttributeData Knockback;
+	
+	
+
+	
+	
+	
 
 
 	
