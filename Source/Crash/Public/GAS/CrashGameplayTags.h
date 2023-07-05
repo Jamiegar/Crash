@@ -27,7 +27,6 @@ public:
 	FGameplayTag DownBasicAttack;
 #pragma endregion
 	FGameplayTag PlayerDamaged;
-	FGameplayTag ComboCount;
 	
 
 	
@@ -48,4 +47,9 @@ public:
 	
 	CrashGameplayTags();
 	~CrashGameplayTags();
+	
+	static FGameplayTag GetGameplayTagFromName(FName Tag);
+
+private:
+	static CrashGameplayTags GameplayTags;
 };

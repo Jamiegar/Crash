@@ -6,7 +6,7 @@
 
 UKnockBackAbility::UKnockBackAbility()
 {
-	ActivationPolicy = OnSpawn;
+	ActivationPolicy = ECrashActivationPolicy::OnSpawn;
 	
 }
 

@@ -25,7 +25,6 @@ void FCrashGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 	AddTag(DownBasicAttack, "Player.Input.DownBasicAttack", "Attack Down Basic");
 
 	AddTag(PlayerDamaged, "Player.Damaged", "Player Has Taken Damage");
-	AddTag(ComboCount, "Player.Combo.Count", "Active Number of Combos");
 }
 
 void FCrashGameplayTags::AddTag(FGameplayTag& OutTag, const ANSICHAR* TagName, const ANSICHAR* TagComment)
@@ -40,4 +39,9 @@ CrashGameplayTags::CrashGameplayTags()
 
 CrashGameplayTags::~CrashGameplayTags()
 {
+}
+
+FGameplayTag CrashGameplayTags::GetGameplayTagFromName(const FName Tag)
+{
+	return FGameplayTag::RequestGameplayTag(Tag);
 }

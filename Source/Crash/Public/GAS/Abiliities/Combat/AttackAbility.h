@@ -6,6 +6,7 @@
 #include "GAS/Abiliities/CrashGameplayAbility.h"
 #include "AttackAbility.generated.h"
 
+class UStunAbilityData;
 class UAbilityTask_WaitGameplayEvent;
 
 UCLASS(Abstract)
@@ -19,11 +20,17 @@ public:
 
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
 	float AbilityDamage = 1.f;
 
-	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
 	float KnockbackScaling = 0;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
+	bool bAttackShouldStun = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage", meta=(EditCondition = bAttackShouldStun))
+	UStunAbilityData* StunData;
 	
 	UPROPERTY()
 	UAbilityTask_WaitGameplayEvent* AsyncTask;

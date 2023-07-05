@@ -5,6 +5,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "GAS/CrashGameplayEffectContext.h"
 #include "GAS/CrashGameplayTags.h"
+#include "GAS/Abiliities/Combat/Damage/Data/StunAbilityData.h"
 #include "GAS/Effects/DamageBasicInstant.h"
 
 void UAttackAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -28,16 +29,23 @@ void UAttackAbility::WaitForDamageEffect()
 void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
 	const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
-
 	const FGameplayEffectSpecHandle Handle = MakeEffectSpecHandleFromAbility(UDamageBasicInstant::StaticClass());
 
 	if(!Handle.IsValid())
 		return;
 	
-	FGameplayEffectSpec* Spec = Handle.Data.Get();
-	Spec->SetSetByCallerMagnitude(GameTags.PlayerDamaged, AbilityDamage);
-	
-	ApplyAbilityTagsToGameplayEffectSpec(*Handle.Data.Get(), GetCurrentAbilitySpec());
-	
+	FGameplayEffectSpec* Spec = Handle.Data.Get(); 
+	Spec->SetSetByCallerMagnitude(GameTags.PlayerDamaged, AbilityDamage); //Sends the Ability damage to the custom damage execute calculation 
+	ApplyAbilityTagsToGameplayEffectSpec(*Handle.Data.Get(), GetCurrentAbilitySpec()); 
 	auto ActiveGameplayEffectHandles = ApplyGameplayEffectSpecToTargetFromAbility(Handle, Payload.TargetData);
+
+	if(StunData != nullptr && bAttackShouldStun)
+	{
+		FGameplayEventData StunPayloadData;
+		StunPayloadData.Instigator = CastChecked<AActor>(GetActorInfo().AvatarActor);
+		StunPayloadData.Target = Payload.Target;
+		StunPayloadData.OptionalObject = StunData;
+		
+		SendGameplayEvent(CrashGameplayTags::GetGameplayTagFromName("Event.StunData"), StunPayloadData);
+	}
 }

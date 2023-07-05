@@ -7,6 +7,7 @@
 #include "CrashGameplayAbility.generated.h"
 
 
+
 UENUM(BlueprintType)
 enum EAbilityInputID
 {
@@ -19,7 +20,7 @@ enum EAbilityInputID
 };
 
 UENUM(BlueprintType)
-enum ECrashActivationPolicy : uint8
+enum class ECrashActivationPolicy : uint8
 {
 	OnInputTriggered,
 	OnSpawn
@@ -42,12 +43,14 @@ public:
 	
 	
 protected:
-
+	bool CommitCrashAbility();
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Crash|Ability Activation")
-	TEnumAsByte<ECrashActivationPolicy> ActivationPolicy;
+	ECrashActivationPolicy ActivationPolicy;
 
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 
 	FGameplayEffectSpecHandle MakeEffectSpecHandleFromAbility(const TSubclassOf<UGameplayEffect> EffectClass) const;
 	TArray<FActiveGameplayEffectHandle> ApplyGameplayEffectSpecToTargetFromAbility(FGameplayEffectSpecHandle SpecHandle, FGameplayAbilityTargetDataHandle& TargetData) const;
+	FActiveGameplayEffectHandle ApplyGameplayEffectSpecToOwnerFromAbility(const FGameplayEffectSpecHandle& SpecHandle) const;
 };

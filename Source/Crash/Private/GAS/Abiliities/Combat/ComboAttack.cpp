@@ -2,11 +2,10 @@
 
 
 #include "GAS/Abiliities/Combat/ComboAttack.h"
-
 #include "AbilitySystemComponent.h"
-#include "GameplayTagsManager.h"
-#include "GAS/CrashGameplayTags.h"
-#include "Abilities/Tasks/AbilityTask_WaitDelay.h"
+#include "Characters/CrashCharacter.h"
+#include "GAS/Effects/ComboIntervalEffect.h"
+#include "Crash/Public/GAS/Abiliities/Combat/Damage/Data/StunAbilityData.h"
 
 UComboAttack::UComboAttack()
 {
@@ -22,21 +21,22 @@ UComboAttack::UComboAttack()
 	ComboMontages.Add(LeftHookMontage.Object);
 	ComboMontages.Add(RightHookMontage.Object);
 	ComboMontages.Add(SideKickMontage.Object);
+
+	static ConstructorHelpers::FObjectFinder<UStunAbilityData> StunDataAsset
+		(TEXT("/Script/Crash.StunAbilityData'/Game/Blueprints/GAS/Abilities/Combat/Data/StunData/DA_DefaultStunAttack.DA_DefaultStunAttack'"));
+
+	bAttackShouldStun = true;
+	StunData = StunDataAsset.Object;
 }
 
 void UComboAttack::PostInitProperties()
 {
 	Super::PostInitProperties();
-
-	const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
 	
-	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
-	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
-	ActivationOwnedTags.AddTag(GameTags.ComboCount);
-
-	//ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.State.Airborne")));
+	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo"));
+	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo"));
 	
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Airborne"));
 }
 
 void UComboAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -47,39 +47,29 @@ void UComboAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 	if(ComboMontages.IsEmpty())
 		return;
 	
+	ComboCount = ActorInfo->AbilitySystemComponent->GetTagCount(FGameplayTag::RequestGameplayTag("Player.Combo.Count"));
+	
+	if(!ComboMontages.IsValidIndex(ComboCount))
+	{
+		CancelAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef(), false);
+		return;
+	}
 	
 	CommitAbility(Handle, ActorInfo, ActivationInfo);
-	
-	const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
-	ComboCount = ActorInfo->AbilitySystemComponent->GetTagCount(GameTags.ComboCount);
-	
-	UE_LOG(LogTemp, Warning, TEXT("Activate Ability = %d"), ComboCount -1);
-	
+	UE_LOG(LogTemp, Warning, TEXT("Activate Ability = %d"), ComboCount);
 
 	if(const USkeletalMeshComponent* SkeletalMeshComponent = GetActorInfo().SkeletalMeshComponent.Get())
 	{
 		UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance();
 
-		if(ComboMontages.IsValidIndex(ComboCount-1))
-			AnimInstance->Montage_Play(ComboMontages[ComboCount-1], 1);
-		else
-			EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef(), true, true);
+		AnimInstance->Montage_Play(ComboMontages[ComboCount], 1);
 		
-		
-
 		FOnMontageEnded Delegate;
 		Delegate.BindUObject(this, &UComboAttack::OnMontageFinished);
 		AnimInstance->Montage_SetEndDelegate(Delegate);
 	}
 
 	WaitForDamageEffect(); //Async Task waits for the damage effect
-	
-	if(WaitDelayAsync == nullptr)
-	{
-		WaitDelayAsync = UAbilityTask_WaitDelay::WaitDelay(this, 1.5f);
-		WaitDelayAsync->OnFinish.AddUniqueDynamic(this, &UComboAttack::OnWaitFinished);
-		WaitDelayAsync->Activate();
-	}
 }
 
 void UComboAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -87,33 +77,24 @@ void UComboAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
-	WaitDelayAsync->OnFinish.RemoveDynamic(this, &UComboAttack::OnWaitFinished);
-	
-	if(WaitDelayAsync != nullptr)
-		if(WaitDelayAsync->IsActive())
-			WaitDelayAsync->EndTask();
-
-	FGameplayTagContainer TagContainer;
-	TArray<FString> Tags;
-	Tags.Add("Player.Combo.Count");
-	Tags.Add("Player.Attack");
-	UGameplayTagsManager::Get().RequestGameplayTagContainer(Tags, TagContainer);
-	
-	ActorInfo->AbilitySystemComponent->RemoveLooseGameplayTags(TagContainer, ComboCount);
+	if(!ComboMontages.IsValidIndex(ComboCount + 1))
+	{
+		FGameplayTagContainer TagContainer;
+		TagContainer.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo.Count"));
+		BP_RemoveGameplayEffectFromOwnerWithGrantedTags(TagContainer);
+	}
 }
 
 void UComboAttack::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted)
 {
-	if(ComboCount >= ComboMontages.Num())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Should End Ability"));
-		WaitDelayAsync->EndTask();
-	}
+	const ACrashCharacter* Character = CastChecked<ACrashCharacter>(GetCurrentActorInfo()->AvatarActor);
+	Character->ApplyEffectToCrashCharacter(UComboIntervalEffect::StaticClass());
+	
+	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef(), true, false);
 }
 
-void UComboAttack::OnWaitFinished()
-{
-	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef(), true, false);
-	UE_LOG(LogTemp, Warning, TEXT("End Ability Combo"));
-}
+
+
+
+
 

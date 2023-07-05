@@ -17,6 +17,7 @@ void UBasicAttack::PostInitProperties()
 	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
 
+	CancelAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo"));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.State.Airborne")));
 }
 
@@ -60,7 +61,6 @@ void UBasicAttack::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted)
 
 void UBasicAttack::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Receaved Payload"));
 	Super::OnGameplayReceivedDamageEvent(Payload);
 }
 

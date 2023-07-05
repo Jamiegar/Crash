@@ -11,13 +11,18 @@ UCrashGameplayAbility::UCrashGameplayAbility()
 
 void UCrashGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const
 {
-	if(ActorInfo && !Spec.IsActive() && ActivationPolicy == OnSpawn)
+	if(ActorInfo && !Spec.IsActive() && ActivationPolicy == ECrashActivationPolicy::OnSpawn)
 	{
 		if(UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
 		{
 			ASC->TryActivateAbility(Spec.Handle);
 		}
 	}
+}
+
+bool UCrashGameplayAbility::CommitCrashAbility()
+{
+	return CommitAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo());
 }
 
 void UCrashGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
@@ -43,6 +48,16 @@ TArray<FActiveGameplayEffectHandle> UCrashGameplayAbility::ApplyGameplayEffectSp
 
 	return ActiveGameplayEffectHandles;
 }
+
+FActiveGameplayEffectHandle UCrashGameplayAbility::ApplyGameplayEffectSpecToOwnerFromAbility(const FGameplayEffectSpecHandle& SpecHandle) const
+{
+	const FActiveGameplayEffectHandle ActiveHandle =
+		ApplyGameplayEffectSpecToOwner(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), SpecHandle);
+
+	return ActiveHandle;
+}
+
+
 
 
 

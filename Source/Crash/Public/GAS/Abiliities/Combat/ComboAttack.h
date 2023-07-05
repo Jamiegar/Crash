@@ -6,8 +6,6 @@
 #include "AttackAbility.h"
 #include "ComboAttack.generated.h"
 
-class UAbilityTask_WaitDelay;
-class UAbilityTask_WaitInputPress;
 /**
  * 
  */
@@ -32,15 +30,9 @@ private:
 	TArray<UAnimMontage*> ComboMontages;
 
 	UPROPERTY()
-	UAbilityTask_WaitDelay* WaitDelayAsync;
-
-	UPROPERTY()
 	int ComboCount;
 
 	UFUNCTION()
 	void OnMontageFinished(UAnimMontage* Montage, bool bInterrupted);
-
-	UFUNCTION()
-	void OnWaitFinished();
 	
 };
