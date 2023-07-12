@@ -6,6 +6,7 @@
 #include "GAS/Abiliities/CrashGameplayAbility.h"
 #include "KnockBackAbility.generated.h"
 
+class UAbilityTask_WaitGameplayEvent;
 /**
  * 
  */
@@ -19,5 +20,12 @@ public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
 		const FGameplayEventData* TriggerEventData) override;
 
-	FVector KnockbackDirection; 
+	FVector KnockbackDirection;
+
+private:
+	UPROPERTY()
+	UAbilityTask_WaitGameplayEvent* AsyncEventKnockbackData;
+
+	UFUNCTION()
+	void OnReceivedKnockbackData(FGameplayEventData Payload);
 };

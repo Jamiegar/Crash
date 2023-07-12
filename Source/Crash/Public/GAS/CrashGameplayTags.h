@@ -25,9 +25,11 @@ public:
 	FGameplayTag RightBasicAttack;
 	FGameplayTag UpBasicAttack;
 	FGameplayTag DownBasicAttack;
+	FGameplayTag BasicAttack;
+	FGameplayTag Block;
+	FGameplayTag Slide;
 #pragma endregion
 	FGameplayTag PlayerDamaged;
-	
 
 	
 protected:
@@ -41,15 +43,15 @@ private:
 #pragma endregion
 
 
-class CRASH_API CrashGameplayTags
+class CRASH_API UCrashGameplayTags
 {
 public:
 	
-	CrashGameplayTags();
-	~CrashGameplayTags();
+	UCrashGameplayTags();
+	~UCrashGameplayTags();
 	
 	static FGameplayTag GetGameplayTagFromName(FName Tag);
 
 private:
-	static CrashGameplayTags GameplayTags;
+	static UCrashGameplayTags GameplayTags;
 };

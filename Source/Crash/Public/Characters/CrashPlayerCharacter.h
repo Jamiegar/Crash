@@ -4,9 +4,11 @@
 #include "CoreMinimal.h"
 #include "CrashCharacter.h"
 #include "InputAction.h"
+#include "Characters/Input/AbilitySystemInputID.h"
 #include "CrashPlayerCharacter.generated.h"
 
 
+class UCrashEnhancedInputComponent;
 class UInputConfig;
 class UInputMappingContext;
 
@@ -39,6 +41,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	UInputConfig* InputConfig;
+
+	UPROPERTY()
+	UCrashEnhancedInputComponent* CrashEnhancedInputComponent;
 	
 	void SetupCameraView() const;
 	
@@ -47,6 +52,12 @@ protected:
 	void BasicMiddleAttackInput(const FInputActionValue& Value);
 	void BasicUpAttackInput(const FInputActionValue& Value);
 	void BasicDownAttackInput(const FInputActionValue& Value);
+	void BasicAttackInput(const FInputActionValue& Value);
+	void BasicBlockInputPressed(const FInputActionValue& Value);
+	void BasicBlockInputReleased(const FInputActionValue& Value);
+	void SlideInputPressed(const FInputActionValue& Value);
+
+	void SendLocalInputToAbilityComponent(const EAbilityInputID InputID, bool bWasPressed = true);
 	
 public:
 	

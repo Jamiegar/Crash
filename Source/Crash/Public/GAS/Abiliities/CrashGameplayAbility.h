@@ -4,20 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
+#include "Characters/Input/AbilitySystemInputID.h"
 #include "CrashGameplayAbility.generated.h"
 
 
-
-UENUM(BlueprintType)
-enum EAbilityInputID
-{
-	None = 0,
-	MovementJump,
-	BasicAttackLeft,
-	BasicAttackRight,
-	BasicAttackUp,
-	BasicAttackDown
-};
 
 UENUM(BlueprintType)
 enum class ECrashActivationPolicy : uint8
@@ -35,7 +25,7 @@ public:
 	UCrashGameplayAbility();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input", meta=(EditCondition="ActivationPolicy == ECrashActivationPolicy::OnInputTriggered"))
-	TEnumAsByte<EAbilityInputID> AbilityInputID = None;
+	EAbilityInputID AbilityInputID = EAbilityInputID::None;
 	
 	ECrashActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
 	

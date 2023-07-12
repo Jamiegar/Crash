@@ -2,28 +2,31 @@
 
 
 #include "GAS/Abiliities/Combat/AttackAbility.h"
+
+#include "AbilitySystemGlobals.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
-#include "GAS/CrashGameplayEffectContext.h"
 #include "GAS/CrashGameplayTags.h"
-#include "GAS/Abiliities/Combat/Damage/Data/StunAbilityData.h"
 #include "GAS/Effects/DamageBasicInstant.h"
+#include "Crash/Public/GAS/Abiliities/Combat/Damage/Data/StunAbilityData.h"
+#include "GAS/Effects/KnockbackCalculationEffect.h"
+#include "AbilitySystemComponent.h"
 
 void UAttackAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+                                const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 	
-	if(AsyncTask)
-		if(AsyncTask->IsActive())
-			AsyncTask->EndTask();
+	if(AsyncDamageTask)
+		if(AsyncDamageTask->IsActive())
+			AsyncDamageTask->EndTask();
 }
 
 void UAttackAbility::WaitForDamageEffect()
 {
 	const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
-	AsyncTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, GameTags.PlayerDamaged, nullptr, true);
-	AsyncTask->EventReceived.AddUniqueDynamic(this, &UAttackAbility::OnGameplayReceivedDamageEvent);
-	AsyncTask->Activate();
+	AsyncDamageTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, GameTags.PlayerDamaged, nullptr, true);
+	AsyncDamageTask->EventReceived.AddUniqueDynamic(this, &UAttackAbility::OnGameplayReceivedDamageEvent);
+	AsyncDamageTask->Activate();
 }
 
 void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
@@ -46,6 +49,26 @@ void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 		StunPayloadData.Target = Payload.Target;
 		StunPayloadData.OptionalObject = StunData;
 		
-		SendGameplayEvent(CrashGameplayTags::GetGameplayTagFromName("Event.StunData"), StunPayloadData);
+		SendGameplayEvent(UCrashGameplayTags::GetGameplayTagFromName("Event.StunData"), StunPayloadData);
 	}
+}
+
+void UAttackAbility::ApplyKnockbackToTarget(FGameplayEventData Payload)
+{
+	const FGameplayEffectSpecHandle Handle = MakeEffectSpecHandleFromAbility(UKnockbackCalculationEffect::StaticClass());
+
+	const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
+	FGameplayEffectSpec* Spec = Handle.Data.Get();
+	Spec->SetSetByCallerMagnitude("Player.Damaged.Knockback", KnockbackScaling);
+
+	ApplyAbilityTagsToGameplayEffectSpec(*Handle.Data.Get(), GetCurrentAbilitySpec());
+	
+	auto ActiveGameplayEffectHandles= ApplyGameplayEffectSpecToTargetFromAbility(Handle, Payload.TargetData);
+
+	FGameplayEventData EventKnockbackData;
+	EventKnockbackData.Instigator = GetActorInfo().AvatarActor.Get();
+	EventKnockbackData.Target = Payload.Target;
+		
+	UAbilitySystemComponent* TargetComponent = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Payload.Target);
+	TargetComponent->HandleGameplayEvent(FGameplayTag::RequestGameplayTag("Event.Data.Knockback"), &EventKnockbackData);
 }

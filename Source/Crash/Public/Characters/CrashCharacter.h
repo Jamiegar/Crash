@@ -6,12 +6,13 @@
 #include "AbilitySystemComponent.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "GAS/CrashAbilitySystemComponent.h"
+#include "GAS/CrashAttributeSet.h"
 #include "CrashCharacter.generated.h"
 
 
 class UKnockbackComponent;
 class UBasicCombatComponent;
-class UCrashAttributeSet;
 class UCrashGameplayAbility;
 
 UCLASS(Abstract)
@@ -26,7 +27,7 @@ public:
 	void AddDefaultAbilities();
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilityComponent; };
-	UCrashAttributeSet* GetCrashAttributeSet() const { return Attributes; }
+	UCrashAttributeSet* GetCrashAttributeSet() const;
 	UBasicCombatComponent* GetBasicCombatComponent() const { return  BasicCombatComponent; }
 
 	virtual void PossessedBy(AController* NewController) override;
@@ -38,6 +39,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsKnockedBack = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bIsShielded = false;
+
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Abilities")
 	TSubclassOf<class UGameplayEffect> DefaultAttributeEffect;
@@ -45,8 +49,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Abilities")
 	TArray<TSubclassOf<UCrashGameplayAbility>> DefaultAbilities;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Getter="GetAbilitySystemComponent", Category= "Abilities")
-	UAbilitySystemComponent* AbilityComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category= "Abilities")
+	UCrashAbilitySystemComponent* AbilityComponent;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Abilities")
 	UBasicCombatComponent* BasicCombatComponent;
@@ -54,18 +58,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Knockback")
 	UKnockbackComponent* KnockbackComponent; 
 	
-
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetCharacterSpeed() { return GetVelocity().Length(); }
-
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Attributes")
-	int NumberOfJumps = 2;
-
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Attributes")
-	int Lives = 3;
-
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Attributes")
-	float PercentageLife = 0;
+	
 	
 	
 	// Called when the game starts or when spawned
@@ -75,14 +70,10 @@ protected:
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void SetUpDefaultMovementValues();
 
-	UFUNCTION(BlueprintCallable, Category="Abilities|Movement")
-	virtual void ActivateJumpAbility();
-
-	
 private:
-
-	UPROPERTY()
-	UCrashAttributeSet* Attributes;
+	UPROPERTY(EditDefaultsOnly)
+	UCrashAttributeSet* CrashAttributes;
+	
 	
 };
 

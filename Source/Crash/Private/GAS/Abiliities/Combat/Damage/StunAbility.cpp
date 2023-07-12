@@ -2,7 +2,6 @@
 
 
 #include "GAS/Abiliities/Combat/Damage/StunAbility.h"
-
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "GAS/CrashGameplayTags.h"
 
@@ -18,7 +17,7 @@ void UStunAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	CommitCrashAbility();
 	
-	AsyncStunDataEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, CrashGameplayTags::GetGameplayTagFromName("Event.StunData"));
+	AsyncStunDataEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, UCrashGameplayTags::GetGameplayTagFromName("Event.StunData"));
 	AsyncStunDataEvent->OnlyTriggerOnce = true;
 	AsyncStunDataEvent->EventReceived.AddUniqueDynamic(this, &UStunAbility::OnReceivedStunData);
 

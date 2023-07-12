@@ -6,10 +6,11 @@
 #include "AttackAbility.h"
 #include "ComboAttack.generated.h"
 
-/**
- * 
- */
-UCLASS()
+class UAbilityTask_WaitInputPress;
+class UAbilityTask_PlayMontageAndWait;
+
+
+UCLASS(Abstract)
 class CRASH_API UComboAttack : public UAttackAbility
 {
 	GENERATED_BODY()
@@ -24,15 +25,60 @@ public:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
 		bool bReplicateEndAbility, bool bWasCancelled) override;
 
-private:
+	virtual void OnGameplayReceivedDamageEvent(FGameplayEventData Payload) override;
 
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Combos", meta=(AllowPrivateAccess = true))
 	TArray<UAnimMontage*> ComboMontages;
 
+private:
+	UPROPERTY()
+	UAbilityTask_PlayMontageAndWait* MontageWaitTask;
+
+	UPROPERTY()
+	UAbilityTask_WaitGameplayEvent* AsyncComboOpenEvent;
+
+	UPROPERTY()
+	UAbilityTask_WaitGameplayEvent* AsyncComboCloseEvent;
+
+	UPROPERTY()
+	UAbilityTask_WaitGameplayEvent* AsyncComboResetEvent;
+
+	UPROPERTY()
+	UAbilityTask_WaitInputPress* AsyncComboInputPressed;
+	
 	UPROPERTY()
 	int ComboCount;
 
+	UPROPERTY()
+	bool bDidRequestCombo = false;
+
+	UPROPERTY()
+	bool bIsComboWindowOpen = false;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Combos")
+	bool DoesNextAttackExist() { return ComboMontages.IsValidIndex(ComboCount + 1); }
+
+	UFUNCTION(BlueprintCallable, Category="Combos")
+	void NextAttackInSequence();
+	
+	UFUNCTION(BlueprintCallable, Category="Combos")
+	UAnimMontage* GetMontageToPlay();
+
 	UFUNCTION()
-	void OnMontageFinished(UAnimMontage* Montage, bool bInterrupted);
+	void OnMontageFinished();
+
+	UFUNCTION()
+	void OnGameplayReceivedOnComboOpen(FGameplayEventData Payload);
+
+	UFUNCTION()
+	void OnGameplayReceivedComboClose(FGameplayEventData Payload);
+
+	UFUNCTION()
+	void OnGameplayReceivedComboRest(FGameplayEventData Payload);
+
+	UFUNCTION()
+	void OnAbilityInputPressed(float TimeWaited);
 	
 };
+

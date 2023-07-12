@@ -6,7 +6,8 @@
 #include "Characters/CombatComponents/KnockbackComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GAS/CrashAttributeSet.h"
+#include "GAS/Abiliities/Combat/Basic/BlockAbility.h"
+#include "GAS/Abiliities/Combat/Basic/SlideAbility.h"
 #include "GAS/Abiliities/Movement/JumpAbility.h"
 #include "GAS/Effects/AirborneEffect.h"
 #include "GAS/Effects/GroundedEffect.h"
@@ -19,15 +20,16 @@ ACrashCharacter::ACrashCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	ACrashCharacter::SetUpDefaultMovementValues();
 	
-	AbilityComponent = CreateDefaultSubobject<UAbilitySystemComponent>("Ability Component");
-	Attributes = CreateDefaultSubobject<UCrashAttributeSet>("Default Attributes");
+	AbilityComponent = CreateDefaultSubobject<UCrashAbilitySystemComponent>("Ability Component");
 	BasicCombatComponent = CreateDefaultSubobject<UBasicCombatComponent>("Basic Combat Component");
 	KnockbackComponent = CreateDefaultSubobject<UKnockbackComponent>("Knockback Component");
 
+	CrashAttributes = CreateDefaultSubobject<UCrashAttributeSet>("Default Attributes");
 	GetCapsuleComponent()->SetCapsuleRadius(50.f);
 	
 	AddDefaultAbilities();
 	SetDefaultMesh();
+
 }
 
 void ACrashCharacter::SetDefaultMesh() const
@@ -58,12 +60,19 @@ void ACrashCharacter::SetDefaultMesh() const
 void ACrashCharacter::AddDefaultAbilities()
 {
 	DefaultAbilities.Add(UJumpAbility::StaticClass());
+	DefaultAbilities.Add(UBlockAbility::StaticClass());
+	DefaultAbilities.Add(USlideAbility::StaticClass());
 	
 	if(BasicCombatComponent)
 	{
 		for (auto BasicCombat : BasicCombatComponent->BasicCombatAbilities)
 			DefaultAbilities.Add(BasicCombat);
 	}
+}
+
+UCrashAttributeSet* ACrashCharacter::GetCrashAttributeSet() const
+{
+	return CrashAttributes;
 }
 
 // Called when the game starts or when spawned
@@ -129,11 +138,6 @@ void ACrashCharacter::SetUpDefaultMovementValues()
 	}
 }
 
-void ACrashCharacter::ActivateJumpAbility()
-{
-	GetAbilitySystemComponent()->TryActivateAbilityByClass(UJumpAbility::StaticClass());
-}
-
 void ACrashCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
@@ -158,7 +162,7 @@ void ACrashCharacter::GiveDefaultAbilities()
 	
 	for (auto StartAbility : DefaultAbilities)
 	{
-		AbilityComponent->GiveAbility(FGameplayAbilitySpec(StartAbility.GetDefaultObject(), 1, StartAbility.GetDefaultObject()->AbilityInputID));
+		AbilityComponent->GiveAbility(FGameplayAbilitySpec(StartAbility.GetDefaultObject(), 1, static_cast<int32>(StartAbility.GetDefaultObject()->AbilityInputID)));
 	}
 }
 

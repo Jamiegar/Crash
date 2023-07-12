@@ -6,12 +6,12 @@
 #include "GameplayTagsManager.h"
 #include "GAS/Abiliities/Combat/Damage/StunAbility.h"
 #include "GAS/EffectCalc/DamageExecution.h"
-#include "GAS/Effects/KnockbackEffect.h"
+#include "GAS/Effects/KnockbackCalculationEffect.h"
 
 UDamageBasicInstant::UDamageBasicInstant()
 {
 	DurationPolicy = EGameplayEffectDurationType::Instant;
-
+	RemovalTagRequirements.RequireTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
 	FGameplayEffectExecutionDefinition DamageExecutionDefinition;
 	DamageExecutionDefinition.CalculationClass = UDamageExecution::StaticClass();
 	
@@ -25,9 +25,5 @@ UDamageBasicInstant::UDamageBasicInstant()
 	UGameplayTagsManager::Get().RequestGameplayTagContainer(Tags, DamageTagContainer);
 	DamageCue.GameplayCueTags = DamageTagContainer;
 	GameplayCues.Add(DamageCue);
-
-	FGameplayAbilitySpecDef AbilitySpecDef;
-	AbilitySpecDef.Ability = UStunAbility::StaticClass();
-	AbilitySpecDef.RemovalPolicy = EGameplayEffectGrantedAbilityRemovePolicy::RemoveAbilityOnEnd;
-	GrantedAbilities.Add(AbilitySpecDef);
+	
 }

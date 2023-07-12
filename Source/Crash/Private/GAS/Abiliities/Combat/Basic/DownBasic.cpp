@@ -2,11 +2,13 @@
 
 
 #include "GAS/Abiliities/Combat/Basic/DownBasic.h"
-#include "GAS/CrashGameplayTags.h"
-#include "GAS/Effects/KnockbackEffect.h"
+#include "AbilitySystemComponent.h"
 
 UDownBasic::UDownBasic()
 {
+	ActivationPolicy = ECrashActivationPolicy::OnInputTriggered;
+	AbilityInputID = EAbilityInputID::BasicAttackDown;
+	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Montage
 		(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/Characters/Animation/Montages/BasicCombat/AnimMon_BasicDownAttack.AnimMon_BasicDownAttack'"));
 
@@ -24,14 +26,4 @@ void UDownBasic::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const 
 void UDownBasic::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
 	Super::OnGameplayReceivedDamageEvent(Payload);
-
-	const FGameplayEffectSpecHandle Handle = MakeEffectSpecHandleFromAbility(UKnockbackEffect::StaticClass());
-
-	const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
-	FGameplayEffectSpec* Spec = Handle.Data.Get();
-	Spec->SetSetByCallerMagnitude("Player.Damaged.Knockback", KnockbackScaling);
-
-	ApplyAbilityTagsToGameplayEffectSpec(*Handle.Data.Get(), GetCurrentAbilitySpec());
-	
-	auto ActiveGameplayEffectHandles= ApplyGameplayEffectSpecToTargetFromAbility(Handle, Payload.TargetData);
 }

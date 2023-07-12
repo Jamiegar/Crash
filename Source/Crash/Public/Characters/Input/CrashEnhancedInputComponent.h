@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "EnhancedInputComponent.h"
+#include "GameplayAbilitySpec.h"
 #include "GameplayTagContainer.h"
 #include "Characters/Input/InputConfig.h"
 #include "CrashEnhancedInputComponent.generated.h"

@@ -11,7 +11,7 @@
 
 UJumpAbility::UJumpAbility()
 {
-	AbilityInputID = MovementJump;
+	AbilityInputID = EAbilityInputID::MovementJump;
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.MovementAction.JumpExhausted")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
 }

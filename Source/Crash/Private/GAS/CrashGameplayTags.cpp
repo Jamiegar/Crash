@@ -23,7 +23,10 @@ void FCrashGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 	AddTag(RightBasicAttack, "Player.Input.RightBasicAttack", "Attack Right Basic");
 	AddTag(UpBasicAttack, "Player.Input.UpBasicAttack", "Attack Up Basic");
 	AddTag(DownBasicAttack, "Player.Input.DownBasicAttack", "Attack Down Basic");
-
+	AddTag(BasicAttack, "Player.Input.BasicAttack", "Neutral Basic Attack");
+	AddTag(Block, "Player.Input.Block", "Player presses blocking Input");
+	AddTag(Slide, "Player.Input.Slide", "Player presses slide Input");
+	
 	AddTag(PlayerDamaged, "Player.Damaged", "Player Has Taken Damage");
 }
 
@@ -33,15 +36,15 @@ void FCrashGameplayTags::AddTag(FGameplayTag& OutTag, const ANSICHAR* TagName, c
 }
 #pragma endregion
 
-CrashGameplayTags::CrashGameplayTags()
+UCrashGameplayTags::UCrashGameplayTags()
 {
 }
 
-CrashGameplayTags::~CrashGameplayTags()
+UCrashGameplayTags::~UCrashGameplayTags()
 {
 }
 
-FGameplayTag CrashGameplayTags::GetGameplayTagFromName(const FName Tag)
+FGameplayTag UCrashGameplayTags::GetGameplayTagFromName(const FName Tag)
 {
 	return FGameplayTag::RequestGameplayTag(Tag);
 }

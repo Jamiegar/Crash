@@ -29,18 +29,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Crash Character Owner")
 	UAbilitySystemComponent* GetOwnersAbilitySystemComponent() const;
-	
-	UFUNCTION(BlueprintCallable, Category="Abilities|Combat")
-	void BasicMiddleAttack();
 
 	UFUNCTION(BlueprintCallable, Category="Abilities|Combat")
-	void BasicUpAttack();
-
-	UFUNCTION(BlueprintCallable, Category="Abilities|Combat")
-	void BasicDownAttack();
-
-	UFUNCTION(BlueprintCallable, Category="Abilities|Combat")
-	void PerformDamageTrace(FName BoneNameLocation);
+	bool PerformDamageTrace(FName BoneNameLocation);
 	
 };
 

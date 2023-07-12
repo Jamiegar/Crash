@@ -50,8 +50,8 @@ void UBasicAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
-	if(AsyncTask)
-		AsyncTask->EndTask();
+	if(AsyncDamageTask)
+		AsyncDamageTask->EndTask();
 }
 
 void UBasicAttack::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted)
@@ -62,5 +62,6 @@ void UBasicAttack::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted)
 void UBasicAttack::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
 	Super::OnGameplayReceivedDamageEvent(Payload);
+	ApplyKnockbackToTarget(Payload);
 }
 

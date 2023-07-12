@@ -5,10 +5,15 @@
 
 UUpBasic::UUpBasic()
 {
+	ActivationPolicy = ECrashActivationPolicy::OnInputTriggered;
+	AbilityInputID = EAbilityInputID::BasicAttackUp;
+
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Montage
 		(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/Characters/Animation/Montages/BasicCombat/AnimMon_BasicUpAttack.AnimMon_BasicUpAttack'"));
 
 	AttackMontage = Montage.Object;
+	KnockbackScaling = 15;
+	
 }
 
 void UUpBasic::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

@@ -4,7 +4,7 @@
 #include "Characters/CombatComponents/BasicCombatComponent.h"
 #include "Characters/CrashCharacter.h"
 #include "GAS/CrashGameplayTags.h"
-#include "GAS/Abiliities/Combat/ComboAttack.h"
+#include "GAS/Abiliities/Combat/Basic/ComboBasic.h"
 #include "GAS/Abiliities/Combat/Basic/DownBasic.h"
 #include "GAS/Abiliities/Combat/Basic/MiddleBasic.h"
 #include "GAS/Abiliities/Combat/Basic/UpBasic.h"
@@ -18,8 +18,7 @@ UBasicCombatComponent::UBasicCombatComponent()
 	BasicCombatAbilities.Add(UMiddleBasic::StaticClass());
 	BasicCombatAbilities.Add(UUpBasic::StaticClass());
 	BasicCombatAbilities.Add(UDownBasic::StaticClass());
-	BasicCombatAbilities.Add(UComboAttack::StaticClass());
-	
+	BasicCombatAbilities.Add(UComboBasic::StaticClass());
 }
 
 ACrashCharacter* UBasicCombatComponent::GetOwningCrashCharacter() const
@@ -32,22 +31,7 @@ UAbilitySystemComponent* UBasicCombatComponent::GetOwnersAbilitySystemComponent(
 	return GetOwningCrashCharacter()->GetAbilitySystemComponent();
 }
 
-void UBasicCombatComponent::BasicMiddleAttack()
-{
-	GetOwnersAbilitySystemComponent()->TryActivateAbilityByClass(UComboAttack::StaticClass());
-}
-
-void UBasicCombatComponent::BasicUpAttack()
-{
-	GetOwnersAbilitySystemComponent()->TryActivateAbilityByClass(UUpBasic::StaticClass());
-}
-
-void UBasicCombatComponent::BasicDownAttack()
-{
-	GetOwnersAbilitySystemComponent()->TryActivateAbilityByClass(UDownBasic::StaticClass());
-}
-
-void UBasicCombatComponent::PerformDamageTrace(FName BoneNameLocation)
+bool UBasicCombatComponent::PerformDamageTrace(FName BoneNameLocation)
 {
 	//Get the world location of socket
 	const FVector SocketLocation = GetOwningCrashCharacter()->GetMesh()->GetSocketLocation(BoneNameLocation); 
@@ -77,6 +61,8 @@ void UBasicCombatComponent::PerformDamageTrace(FName BoneNameLocation)
 
 		const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
 		GetOwnersAbilitySystemComponent()->HandleGameplayEvent(GameTags.PlayerDamaged, EventData);
+		return true;
 	}
+	return false;
 }
 

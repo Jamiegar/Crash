@@ -2,8 +2,8 @@
 
 
 #include "GAS/Abiliities/Combat/DamageNotifies/MeleeHit.h"
-
 #include "Characters/CombatComponents/BasicCombatComponent.h"
+#include "Niagara/Public/NiagaraFunctionLibrary.h"
 
 
 void UMeleeHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
@@ -16,6 +16,13 @@ void UMeleeHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Anim
 	if(const AActor* OwningActor = MeshComp->GetOwner())
 	{
 		if(UBasicCombatComponent* Component = Cast<UBasicCombatComponent>(OwningActor->GetComponentByClass(UBasicCombatComponent::StaticClass())))
-			Component->PerformDamageTrace(BoneNameTraceLocation);
+		{
+			if(Component->PerformDamageTrace(BoneNameTraceLocation) && ConfirmHitVFX != nullptr)
+			{
+				const FVector SpawnLocation = MeshComp->GetBoneLocation(BoneNameTraceLocation);
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(MeshComp->GetOwner(), ConfirmHitVFX, SpawnLocation);
+			}
+		}
+		
 	}
 }

@@ -33,11 +33,14 @@ protected:
 	UStunAbilityData* StunData;
 	
 	UPROPERTY()
-	UAbilityTask_WaitGameplayEvent* AsyncTask;
+	UAbilityTask_WaitGameplayEvent* AsyncDamageTask;
 	
 	UFUNCTION()
 	void WaitForDamageEffect();
 	
 	UFUNCTION()
 	virtual void OnGameplayReceivedDamageEvent(FGameplayEventData Payload);
+
+	UFUNCTION()
+	void ApplyKnockbackToTarget(FGameplayEventData Payload);
 };
