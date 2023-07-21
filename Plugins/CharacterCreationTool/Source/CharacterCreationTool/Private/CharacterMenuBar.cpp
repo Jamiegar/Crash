@@ -2,12 +2,11 @@
 
 
 #include "CharacterMenuBar.h"
-
-#include "CharacterDropDownMenu.h"
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
-#include "PropertyCustomizationHelpers.h"
 #include "SlateOptMacros.h"
+#include "AbilityMapping/InputAbilityMappingWidget.h"
+
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -15,6 +14,8 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SCharacterMenuBar::Construct(const FArguments& InArgs)
 {
 	AssetThumbnailPool = MakeShareable(new FAssetThumbnailPool(24));
+	
+	
 	ChildSlot
 	[
 		SNew(SHorizontalBox)
@@ -29,27 +30,16 @@ void SCharacterMenuBar::Construct(const FArguments& InArgs)
 			]
 			.OnGetMenuContent(this, &SCharacterMenuBar::GenerateAssetPicker)
 			
-			
-			/*SNew(SObjectPropertyEntryBox)
-			.OnObjectChanged(this, &SCharacterMenuBar::OnPropertyChanged)
-			.AllowedClass(UStaticMesh::StaticClass())
-			.DisplayThumbnail(true)
-			.DisplayBrowse(true)
-			.EnableContentPicker(true)
-			.DisplayCompactSize(false)
-			.AllowClear(true)
-			.PropertyHandle()*/
-
 		]
 		+SHorizontalBox::Slot()
-		.AutoWidth().VAlign(VAlign_Top) .HAlign(HAlign_Left)
+		.AutoWidth().VAlign(VAlign_Top) .HAlign(HAlign_Center)
 		[
 			SNew(SButton)
 			.Text(FText::FromString("Create New Ability"))
 			.OnClicked(FOnClicked::CreateSP(this, &SCharacterMenuBar::OnCreateNewAbilityButtonClicked))
 		]
 		+SHorizontalBox::Slot()
-		.AutoWidth().VAlign(VAlign_Top) .HAlign(HAlign_Left)
+		.AutoWidth().VAlign(VAlign_Top) .HAlign(HAlign_Right)
 		[
 			SNew(SButton)
 			.Text(FText::FromString("Create New Character"))
@@ -77,7 +67,7 @@ TSharedRef<SWidget> SCharacterMenuBar::GenerateAssetPicker()
 	const FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser"));
 	
 	FAssetPickerConfig PickerConfig;
-	PickerConfig.Filter.ClassPaths.Add(FTopLevelAssetPath("/Script/Crash.CrashCharacter"));
+	PickerConfig.Filter.ClassPaths.Add(AllowedClass->GetClassPathName());
 	PickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP(this, &SCharacterMenuBar::OnAssetSelected);
 	PickerConfig.bAllowNullSelection = true;
 	PickerConfig.Filter.bRecursiveClasses = true;
@@ -85,8 +75,6 @@ TSharedRef<SWidget> SCharacterMenuBar::GenerateAssetPicker()
 	PickerConfig.bAllowDragging = false;
 	PickerConfig.bCanShowFolders = true;
 	PickerConfig.bCanShowClasses = true;
-	
-	
 	
 	
 	return

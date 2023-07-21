@@ -13,6 +13,8 @@ void ACrashGameModeBase::BeginPlay()
 	{
 		UGameplayStatics::CreatePlayer(this, 1, true);
 	}
+
+	OnGameSetupCompleted.ExecuteIfBound();
 }
 
 void ACrashGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)

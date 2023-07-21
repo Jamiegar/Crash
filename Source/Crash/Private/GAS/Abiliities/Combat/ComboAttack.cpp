@@ -8,6 +8,7 @@
 #include "GAS/CrashGameplayTags.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
+#include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
 
 UComboAttack::UComboAttack()
 {
@@ -16,6 +17,11 @@ UComboAttack::UComboAttack()
 
 	bAttackShouldStun = true;
 	StunData = StunDataAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<UKnockbackData> DefaultKnockbackData
+		(TEXT("/Script/Crash.KnockbackData'/Game/Blueprints/GAS/Abilities/Combat/Data/KnockbackData/DA_DefaultKnockback.DA_DefaultKnockback'"));
+	
+	KnockbackData = DefaultKnockbackData.Object;
 }
 
 void UComboAttack::PostInitProperties()
@@ -24,9 +30,14 @@ void UComboAttack::PostInitProperties()
 	
 	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo"));
 	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo"));
+	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
+
 	BlockAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo"));
 	BlockAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
+
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Airborne"));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
 }
 
 void UComboAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -59,6 +70,10 @@ void UComboAttack::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 	if(ComboCount == ComboMontages.Num()-1)
 	{
 		ApplyKnockbackToTarget(Payload);
+	}
+	else
+	{
+		ApplyStunToTarget(Payload);
 	}
 }
 

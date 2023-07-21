@@ -12,8 +12,9 @@
 UJumpAbility::UJumpAbility()
 {
 	AbilityInputID = EAbilityInputID::MovementJump;
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.MovementAction.JumpExhausted")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.MovementAction.JumpExhausted"));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
 }
 
 
@@ -35,7 +36,6 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 		
 		if(Attributes)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Jumps = %f"), Attributes->GetNumberOfJumps());
 			if(Attributes->GetNumberOfJumps() <= 0)
 				Character->ApplyEffectToCrashCharacter(UJumpExhaustedEffect::StaticClass());
 		}

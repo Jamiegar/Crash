@@ -4,9 +4,15 @@
 #include "GAS/Abiliities/Combat/BasicAttack.h"
 #include "Characters/CrashCharacter.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
+#include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
 
 UBasicAttack::UBasicAttack()
 {
+	static ConstructorHelpers::FObjectFinder<UKnockbackData> DefaultKnockbackData
+		(TEXT("/Script/Crash.KnockbackData'/Game/Blueprints/GAS/Abilities/Combat/Data/KnockbackData/DA_DefaultKnockback.DA_DefaultKnockback'"));
+
+	KnockbackData = DefaultKnockbackData.Object;
+	KnockbackScaling = 15;
 }
 
 void UBasicAttack::PostInitProperties()
@@ -15,10 +21,12 @@ void UBasicAttack::PostInitProperties()
 	
 	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
 	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
 
 	CancelAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo"));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.State.Airborne")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
+	
 }
 
 void UBasicAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -29,7 +37,8 @@ void UBasicAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 	if(!AttackMontage)
 		return;
 
-	CommitAbility(Handle, ActorInfo, ActivationInfo);
+	if(!CommitAbility(Handle, ActorInfo, ActivationInfo))
+		return;
 	
 	if(const USkeletalMeshComponent* SkeletalMesh = ActorInfo->SkeletalMeshComponent.Get())
 	{

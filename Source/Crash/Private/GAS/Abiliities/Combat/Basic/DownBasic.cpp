@@ -3,6 +3,7 @@
 
 #include "GAS/Abiliities/Combat/Basic/DownBasic.h"
 #include "AbilitySystemComponent.h"
+#include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
 
 UDownBasic::UDownBasic()
 {
@@ -14,7 +15,12 @@ UDownBasic::UDownBasic()
 
 	AttackMontage = Montage.Object;
 	AbilityDamage = 5;
-	KnockbackScaling = 10.0f;
+
+	static ConstructorHelpers::FObjectFinder<UKnockbackData> DownBasicKnockbackData
+		(TEXT("/Script/Crash.KnockbackData'/Game/Blueprints/GAS/Abilities/Combat/Data/KnockbackData/DA_BasicDownKnockback.DA_BasicDownKnockback'"));
+
+	KnockbackData = DownBasicKnockbackData.Object;
+
 }
 
 void UDownBasic::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

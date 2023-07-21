@@ -4,11 +4,11 @@
 #include "CharacterCreationToolStyle.h"
 #include "CharacterCreationToolCommands.h"
 #include "CharacterMenuBar.h"
-#include "LevelEditor.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
+#include "AbilityMapping/AbilityActionMap.h"
 
 static const FName CharacterCreationToolTabName("CharacterCreationTool");
 
@@ -64,8 +64,27 @@ TSharedRef<SDockTab> FCharacterCreationToolModule::OnSpawnPluginTab(const FSpawn
 	return SNew(SDockTab)
 	.TabRole(ETabRole::NomadTab)
 	[
-		SNew(SCharacterMenuBar)
-		
+		SNew(SVerticalBox)
+		+SVerticalBox::Slot()
+		.AutoHeight() .VAlign(VAlign_Top) .HAlign(HAlign_Left)
+		[
+			SNew(SCharacterMenuBar)
+		]
+		+SVerticalBox::Slot()
+		.VAlign(VAlign_Center) . HAlign(HAlign_Center)
+		[
+			SNew(SHorizontalBox)
+			+SHorizontalBox::Slot()
+			.AutoWidth() .VAlign(VAlign_Center) .HAlign(HAlign_Center) .Padding(10, 20)
+			[
+				SNew(SAbilityActionMap)
+			]
+			+SHorizontalBox::Slot()
+			.AutoWidth() .VAlign(VAlign_Center) .HAlign(HAlign_Center) .Padding(10, 20)
+			[
+				SNew(SAbilityActionMap)
+			]
+		]
 	];
 }
 

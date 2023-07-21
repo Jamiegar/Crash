@@ -6,16 +6,17 @@
 #include "GameFramework/GameModeBase.h"
 #include "CrashGameModeBase.generated.h"
 
-/**
- * 
- */
+
+DECLARE_DELEGATE(FOnGameSetupCompleted)
+inline FOnGameSetupCompleted OnGameSetupCompleted;
+
 UCLASS()
 class CRASH_API ACrashGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
-
+	
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	int NumberOfPlayers = 2;
 

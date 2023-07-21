@@ -2,6 +2,7 @@
 
 
 #include "GAS/Abiliities/Combat/Basic/UpBasic.h"
+#include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
 
 UUpBasic::UUpBasic()
 {
@@ -12,8 +13,11 @@ UUpBasic::UUpBasic()
 		(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/Characters/Animation/Montages/BasicCombat/AnimMon_BasicUpAttack.AnimMon_BasicUpAttack'"));
 
 	AttackMontage = Montage.Object;
-	KnockbackScaling = 15;
 	
+	static ConstructorHelpers::FObjectFinder<UKnockbackData> UpBasicKnockbackData
+		(TEXT("/Script/Crash.KnockbackData'/Game/Blueprints/GAS/Abilities/Combat/Data/KnockbackData/DA_DefaultKnockback.DA_DefaultKnockback'"));
+
+	KnockbackData = UpBasicKnockbackData.Object;
 }
 
 void UUpBasic::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

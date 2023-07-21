@@ -2,6 +2,7 @@
 
 
 #include "GAS/Abiliities/Combat/Basic/MiddleBasic.h"
+#include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
 
 UMiddleBasic::UMiddleBasic()
 {
@@ -9,11 +10,14 @@ UMiddleBasic::UMiddleBasic()
 	AbilityInputID = EAbilityInputID::BasicAttackMiddle;
 	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Montage
-		(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/Characters/Animation/Montages/BasicCombat/AnimMon_BasicLeftHook.AnimMon_BasicLeftHook'"));
+		(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/Characters/Animation/Montages/BasicCombat/AnimMon_MiddleAttack.AnimMon_MiddleAttack'"));
 
 	AttackMontage = Montage.Object;
 
-	KnockbackScaling = 5;
+	static ConstructorHelpers::FObjectFinder<UKnockbackData> MiddleBasicKnockbackData
+		(TEXT("/Script/Crash.KnockbackData'/Game/Blueprints/GAS/Abilities/Combat/Data/KnockbackData/DA_BasicMiddleKnockback.DA_BasicMiddleKnockback'"));
+
+	KnockbackData = MiddleBasicKnockbackData.Object;
 }
 
 void UMiddleBasic::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

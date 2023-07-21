@@ -9,14 +9,16 @@ public class CharacterCreationTool : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicIncludePaths.AddRange(
-			new string[] {
+			new string[] 
+			{
 				// ... add public include paths required here ...
 			}
 			);
 				
 		
 		PrivateIncludePaths.AddRange(
-			new string[] {
+			new string[] 
+			{
 				// ... add other private include paths required here ...
 			}
 			);
@@ -25,7 +27,9 @@ public class CharacterCreationTool : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core", "PropertyEditor"
+				"Core", 
+				"PropertyEditor",
+				
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -42,7 +46,9 @@ public class CharacterCreationTool : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore",
+				"SlateCore", 
+				"GameplayAbilities",
+				
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

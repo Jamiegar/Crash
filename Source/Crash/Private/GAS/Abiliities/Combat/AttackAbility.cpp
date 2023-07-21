@@ -10,6 +10,8 @@
 #include "Crash/Public/GAS/Abiliities/Combat/Damage/Data/StunAbilityData.h"
 #include "GAS/Effects/KnockbackCalculationEffect.h"
 #include "AbilitySystemComponent.h"
+#include "GAS/Abiliities/Combat/Damage/StunAbility.h"
+#include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
 
 void UAttackAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -37,27 +39,16 @@ void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 	if(!Handle.IsValid())
 		return;
 	
-	FGameplayEffectSpec* Spec = Handle.Data.Get(); 
+	FGameplayEffectSpec* Spec = Handle.Data.Get();
 	Spec->SetSetByCallerMagnitude(GameTags.PlayerDamaged, AbilityDamage); //Sends the Ability damage to the custom damage execute calculation 
 	ApplyAbilityTagsToGameplayEffectSpec(*Handle.Data.Get(), GetCurrentAbilitySpec()); 
 	auto ActiveGameplayEffectHandles = ApplyGameplayEffectSpecToTargetFromAbility(Handle, Payload.TargetData);
-
-	if(StunData != nullptr && bAttackShouldStun)
-	{
-		FGameplayEventData StunPayloadData;
-		StunPayloadData.Instigator = CastChecked<AActor>(GetActorInfo().AvatarActor);
-		StunPayloadData.Target = Payload.Target;
-		StunPayloadData.OptionalObject = StunData;
-		
-		SendGameplayEvent(UCrashGameplayTags::GetGameplayTagFromName("Event.StunData"), StunPayloadData);
-	}
 }
 
 void UAttackAbility::ApplyKnockbackToTarget(FGameplayEventData Payload)
 {
 	const FGameplayEffectSpecHandle Handle = MakeEffectSpecHandleFromAbility(UKnockbackCalculationEffect::StaticClass());
-
-	const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
+	
 	FGameplayEffectSpec* Spec = Handle.Data.Get();
 	Spec->SetSetByCallerMagnitude("Player.Damaged.Knockback", KnockbackScaling);
 
@@ -68,7 +59,29 @@ void UAttackAbility::ApplyKnockbackToTarget(FGameplayEventData Payload)
 	FGameplayEventData EventKnockbackData;
 	EventKnockbackData.Instigator = GetActorInfo().AvatarActor.Get();
 	EventKnockbackData.Target = Payload.Target;
+
+	if(KnockbackData)
+		EventKnockbackData.OptionalObject = KnockbackData;
 		
 	UAbilitySystemComponent* TargetComponent = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Payload.Target);
 	TargetComponent->HandleGameplayEvent(FGameplayTag::RequestGameplayTag("Event.Data.Knockback"), &EventKnockbackData);
+}
+
+void UAttackAbility::ApplyStunToTarget(FGameplayEventData Payload)
+{
+	UAbilitySystemComponent* TargetComponent = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Payload.Target);
+
+	FGameplayAbilitySpec StunSpec = FGameplayAbilitySpec(UStunAbility::StaticClass());
+	TargetComponent->GiveAbility(StunSpec);
+	
+	if(StunData != nullptr && bAttackShouldStun)
+	{
+		FGameplayEventData StunPayloadData;
+		StunPayloadData.Instigator = CastChecked<AActor>(GetActorInfo().AvatarActor);
+		StunPayloadData.Target = Payload.Target;
+		StunPayloadData.OptionalObject = StunData;
+
+		const FGameplayTag StunEventTag = FGameplayTag::RequestGameplayTag("Event.Data.Stun");
+		TargetComponent->HandleGameplayEvent(StunEventTag, &StunPayloadData);
+	}
 }

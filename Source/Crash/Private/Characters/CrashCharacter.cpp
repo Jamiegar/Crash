@@ -11,6 +11,9 @@
 #include "GAS/Abiliities/Movement/JumpAbility.h"
 #include "GAS/Effects/AirborneEffect.h"
 #include "GAS/Effects/GroundedEffect.h"
+#include "Components/TimelineComponent.h"
+#include "GAS/Abiliities/Combat/Damage/DeathEffect.h"
+#include "GAS/Abiliities/Combat/Damage/RespawnAbility.h"
 
 
 // Sets default values
@@ -24,12 +27,17 @@ ACrashCharacter::ACrashCharacter()
 	BasicCombatComponent = CreateDefaultSubobject<UBasicCombatComponent>("Basic Combat Component");
 	KnockbackComponent = CreateDefaultSubobject<UKnockbackComponent>("Knockback Component");
 
+	MeshAttachment = CreateDefaultSubobject<USceneComponent>("Mesh Attachment");
+	MeshAttachment->SetupAttachment(RootComponent);
+	GetMesh()->SetupAttachment(MeshAttachment, MeshAttachment->GetAttachSocketName());
+	
 	CrashAttributes = CreateDefaultSubobject<UCrashAttributeSet>("Default Attributes");
+	TimelineComponent = CreateDefaultSubobject<UTimelineComponent>("Timeline");
+	
 	GetCapsuleComponent()->SetCapsuleRadius(50.f);
 	
 	AddDefaultAbilities();
 	SetDefaultMesh();
-
 }
 
 void ACrashCharacter::SetDefaultMesh() const
@@ -75,12 +83,32 @@ UCrashAttributeSet* ACrashCharacter::GetCrashAttributeSet() const
 	return CrashAttributes;
 }
 
+void ACrashCharacter::CheckFallingDown()
+{
+	if(GetVelocity().Z < 0)
+	{
+		OnCharacterFallingDown.Broadcast();
+		FallingDownTimerHandle.Invalidate();
+		bIsFallingDown = true;
+	}
+}
+
 // Called when the game starts or when spawned
 void ACrashCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 	ApplyEffectToCrashCharacter(UGroundedEffect::StaticClass());
+}
+
+void ACrashCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if(TimelineComponent != nullptr)
+	{
+		TimelineComponent->TickComponent(DeltaSeconds, LEVELTICK_TimeOnly, nullptr);
+	}
 }
 
 void ACrashCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
@@ -103,6 +131,8 @@ void ACrashCharacter::OnStartedFalling()
 	const UAirborneEffect* Effect = NewObject<UAirborneEffect>();
 	const FGameplayEffectContextHandle ContextHandle = FGameplayEffectContextHandle();
 	GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(Effect, 0, ContextHandle);
+
+	GetWorldTimerManager().SetTimer(FallingDownTimerHandle, this, &ACrashCharacter::CheckFallingDown, 0.1f, true);
 }
 
 void ACrashCharacter::Landed(const FHitResult& Hit)
@@ -110,7 +140,12 @@ void ACrashCharacter::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 
 	ApplyEffectToCrashCharacter(UGroundedEffect::StaticClass());
-	
+	bIsKnockedBack = false;
+	bIsFallingDown = false;
+
+	const FGameplayTag LandedTag = FGameplayTag::RequestGameplayTag("Player.State.Grounded");
+	FGameplayEventData Data;
+	GetAbilitySystemComponent()->HandleGameplayEvent(LandedTag, &Data);
 }
 
 void ACrashCharacter::SetUpDefaultMovementValues()
@@ -175,6 +210,23 @@ void ACrashCharacter::ApplyEffectToCrashCharacter(TSubclassOf<UGameplayEffect> E
 	
 	if(SpecHandle.IsValid())
 		FActiveGameplayEffectHandle GEHandle = AbilityComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+}
+
+void ACrashCharacter::KillCharacter()
+{
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+
+	bIsStuned = false;
+	bIsKnockedBack = false;
+	bEndKnockback = true;
+	bIsFallingDown = false;
+	
+	ApplyEffectToCrashCharacter(UDeathEffect::StaticClass());
+
+	FGameplayAbilitySpec RespawnAbility = FGameplayAbilitySpec(URespawnAbility::StaticClass());
+	GetAbilitySystemComponent()->GiveAbilityAndActivateOnce(RespawnAbility);
+	
+	OnCharacterDeath.Broadcast();
 }
 
 

@@ -14,9 +14,17 @@ UBlockAbility::UBlockAbility()
 	ActivationPolicy = ECrashActivationPolicy::OnInputTriggered;
 	AbilityInputID = EAbilityInputID::Block;
 
+	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
 	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
+	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Invincible"));
+	
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Airborne"));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
+
+	BlockAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
+	BlockAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Stun"));
+
+	
 	
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShieldDefaultMesh
@@ -34,6 +42,9 @@ void UBlockAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, con
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
+	if(!CommitAbility(Handle, ActorInfo, ActivationInfo))
+		return;
+	
 	AsyncWaitInputRelease = UAbilityTask_WaitInputRelease::WaitInputRelease(this);
 	AsyncWaitInputRelease->OnRelease.AddUniqueDynamic(this, &UBlockAbility::OnInputRelease);
 	AsyncWaitInputRelease->Activate();
@@ -54,6 +65,13 @@ void UBlockAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, con
 		FVector(), FRotator(), EAttachLocation::Type::KeepRelativeOffset, true);
 
 	Character->GetCharacterMovement()->SetMovementMode(MOVE_None);
+}
+
+void UBlockAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
+{
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+	OnInputRelease(0);
 }
 
 void UBlockAbility::OnInputRelease(float TimeHeld)

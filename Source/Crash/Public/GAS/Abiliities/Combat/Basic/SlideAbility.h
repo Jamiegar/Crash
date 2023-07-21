@@ -24,4 +24,9 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Slide")
 	UAnimMontage* SlideMontage;
+
+	UFUNCTION()
+	void OnMontageFinished(UAnimMontage* AnimMontage, bool bInterrupted);
+
+	virtual void OnGameplayReceivedDamageEvent(FGameplayEventData Payload) override;
 };

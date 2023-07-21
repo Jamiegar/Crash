@@ -7,6 +7,8 @@
 #include "KnockbackComponent.generated.h"
 
 
+class ACrashCharacter;
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CRASH_API UKnockbackComponent : public UActorComponent
 {
@@ -18,6 +20,20 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Knockback")
 	void ApplyKnockbackToCharacter(const FVector LaunchDirection, const float Magnitude);
+
+	UFUNCTION(BlueprintCallable, Category="Knockback")
+	void StartScrew(UCurveFloat* ScrewCurve);
+
+	UFUNCTION(BlueprintCallable, Category="Knockback")
+	void StopScrew();
+
+	UFUNCTION()
+	void ScrewTimelineUpdate(float InterpValue);
+
+private:
+	virtual void BeginPlay() override;
 	
+	
+	ACrashCharacter* OwnerCharacter;
 	
 };

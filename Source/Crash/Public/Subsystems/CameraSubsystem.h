@@ -19,11 +19,22 @@ class CRASH_API UCameraSubsystem : public UWorldSubsystem
 private:
 	UPROPERTY(BlueprintGetter=GetCamera)
 	ACrashCamera* CameraActor = nullptr;
+
+	UPROPERTY()
+	TArray<const ACharacter*> RegisteredCharacters;
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+	UFUNCTION()
+	virtual void OnGameSetUpComplete();
+
 
 public:
 	UFUNCTION(BlueprintPure, BlueprintInternalUseOnly)
 	ACrashCamera* GetCamera();
+
+	UFUNCTION(BlueprintCallable)
+	void RegisterPlayerToCamera(const ACharacter* Character);
 	
+	TArray<const ACharacter*>& GetRegisteredCharacters() { return RegisteredCharacters; }
 };

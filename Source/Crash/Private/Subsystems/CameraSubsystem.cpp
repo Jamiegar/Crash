@@ -2,11 +2,21 @@
 
 
 #include "Subsystems/CameraSubsystem.h"
+
+#include "Crash/CrashGameModeBase.h"
+#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
 void UCameraSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+	OnGameSetupCompleted.BindUObject(this, &UCameraSubsystem::OnGameSetUpComplete);
+}
+
+void UCameraSubsystem::OnGameSetUpComplete()
+{
+	GetCamera()->SetActiveCharacters(RegisteredCharacters);
 }
 
 ACrashCamera* UCameraSubsystem::GetCamera()
@@ -25,3 +35,16 @@ ACrashCamera* UCameraSubsystem::GetCamera()
 	}
 	return CameraActor; //Return ptr to camera
 }
+
+void UCameraSubsystem::RegisterPlayerToCamera(const ACharacter* Character)
+{
+	if(!Character)
+		return;
+
+	if(APlayerController* PlayerController = Cast<APlayerController>(Character->GetController())) //True == player character
+		PlayerController->SetViewTarget(GetCamera());
+
+	RegisteredCharacters.Add(Character);
+}
+
+

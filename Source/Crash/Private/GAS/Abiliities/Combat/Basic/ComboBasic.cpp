@@ -2,6 +2,7 @@
 
 
 #include "GAS/Abiliities/Combat/Basic/ComboBasic.h"
+#include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
 
 UComboBasic::UComboBasic()
 {
@@ -20,5 +21,10 @@ UComboBasic::UComboBasic()
 
 	AbilityInputID = EAbilityInputID::BasicAttack;
 
-	KnockbackScaling = 10;
+	KnockbackScaling = 15;
+
+	static ConstructorHelpers::FObjectFinder<UKnockbackData> ComboKnockbackData
+		(TEXT("/Script/Crash.KnockbackData'/Game/Blueprints/GAS/Abilities/Combat/Data/KnockbackData/DA_BasicComboKnockbackData.DA_BasicComboKnockbackData'"));
+
+	KnockbackData = ComboKnockbackData.Object;
 }

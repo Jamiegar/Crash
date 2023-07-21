@@ -6,6 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "CrashCamera.generated.h"
 
+
+class UBoxComponent;
+class UCameraComponent;
+class USpringArmComponent;
+
 UCLASS()
 class CRASH_API ACrashCamera : public AActor
 {
@@ -15,16 +20,60 @@ public:
 	// Sets default values for this actor's properties
 	ACrashCamera();
 
-protected:
-	UPROPERTY(BlueprintReadOnly)
-	class UCameraComponent* CameraComponent;
+	void SetActiveCharacters(const TArray<const ACharacter*>& Characters);
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+	
+protected:
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Camera Movement")
+	float CameraMoveSpeed = 3.5;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Camera Movement")
+	float ZoomSpeed = 2.5;
+	
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Camera Movement")
+	float MaxCameraDistance = 3000;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Camera Movement")
+	float MinCameraDistance = 1000;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Camera Movement")
+	FVector CameraMovementOffset = FVector(0, 0, 3.5);
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Camera Bounds")
+	FVector BoundsOffset = FVector(0, 0, 500);
+	
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Camera Bounds")
+	FVector2f BoxExtent = FVector2f(2000, 500);
+	
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Camera Bounds")
+	UBoxComponent* CameraBounds;
+	
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	USpringArmComponent* SpringArm;
+
+	UPROPERTY(BlueprintReadOnly)
+	UCameraComponent* CameraComponent;
+
+	UPROPERTY()
+	TArray<const ACharacter*> ActiveCharacters;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	void GetMinMaxPosition(FVector& OutMax, FVector& OutMin);
+	
+	FVector CalculateAverageLocation(TArray<const ACharacter*> Characters);
+
+	void CameraMovement(float DeltaTime);
+	void CameraZoom(float DeltaTime);
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+private:
+	FVector PreviousLocation;
 
 };

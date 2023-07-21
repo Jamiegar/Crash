@@ -3,26 +3,28 @@
 
 #include "GAS/Effects/Knockback/KnockbackEffect.h"
 
+#include "GameplayTagsManager.h"
 #include "GAS/Abiliities/Combat/Damage/KnockBackAbility.h"
 
 UKnockbackEffect::UKnockbackEffect()
 {
 	DurationPolicy = EGameplayEffectDurationType::Infinite;
-	InheritableOwnedTagsContainer.AddTag(FGameplayTag::RequestGameplayTag("Player.Damaged.Knockback"));
+
+	InheritableGameplayEffectTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Damaged.Knockback"));
 	
-	/*FGameplayEffectCue KnockbackCue;
+	FGameplayEffectCue KnockbackCue;
 	FGameplayTagContainer KnockbackTagContainer;
 	TArray<FString> Tags;
-	Tags.Add("GameplayCue.Knockback");
+	Tags.Add("GameplayCue.ApplyedKnockback");
 	
 	UGameplayTagsManager::Get().RequestGameplayTagContainer(Tags, KnockbackTagContainer);
 	KnockbackCue.GameplayCueTags = KnockbackTagContainer;
-	GameplayCues.Add(KnockbackCue);*/
+	GameplayCues.Add(KnockbackCue);
 
 	
 	FGameplayAbilitySpecDef AbilitySpecDef;
 	AbilitySpecDef.Ability = UKnockBackAbility::StaticClass();
-	AbilitySpecDef.RemovalPolicy = EGameplayEffectGrantedAbilityRemovePolicy::DoNothing;
+	AbilitySpecDef.RemovalPolicy = EGameplayEffectGrantedAbilityRemovePolicy::CancelAbilityImmediately;
 	
 	GrantedAbilities.Add(AbilitySpecDef);
 }

@@ -21,5 +21,5 @@ public:
 	float StunDuration = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float MovementUnits = 5.0f;
+	UCurveFloat* ShakeCurve;
 };

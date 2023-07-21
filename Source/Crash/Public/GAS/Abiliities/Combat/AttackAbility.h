@@ -6,6 +6,7 @@
 #include "GAS/Abiliities/CrashGameplayAbility.h"
 #include "AttackAbility.generated.h"
 
+class UKnockbackData;
 class UStunAbilityData;
 class UAbilityTask_WaitGameplayEvent;
 
@@ -31,6 +32,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage", meta=(EditCondition = bAttackShouldStun))
 	UStunAbilityData* StunData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Knockback")
+	UKnockbackData* KnockbackData;
 	
 	UPROPERTY()
 	UAbilityTask_WaitGameplayEvent* AsyncDamageTask;
@@ -43,4 +47,7 @@ protected:
 
 	UFUNCTION()
 	void ApplyKnockbackToTarget(FGameplayEventData Payload);
+
+	UFUNCTION()
+	void ApplyStunToTarget(FGameplayEventData Payload);
 };

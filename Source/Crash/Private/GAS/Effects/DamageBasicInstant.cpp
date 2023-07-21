@@ -11,7 +11,11 @@
 UDamageBasicInstant::UDamageBasicInstant()
 {
 	DurationPolicy = EGameplayEffectDurationType::Instant;
-	RemovalTagRequirements.RequireTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
+
+	InheritableGameplayEffectTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Damaged"));
+	
+	RemovalTagRequirements.RequireTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Invincible"));
+
 	FGameplayEffectExecutionDefinition DamageExecutionDefinition;
 	DamageExecutionDefinition.CalculationClass = UDamageExecution::StaticClass();
 	

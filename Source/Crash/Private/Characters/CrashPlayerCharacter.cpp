@@ -37,12 +37,7 @@ void ACrashPlayerCharacter::InitializePlayerCharacter()
 void ACrashPlayerCharacter::SetupCameraView() const
 {
 	if(UCameraSubsystem* CameraSubsystem = GetWorld()->GetSubsystem<UCameraSubsystem>())
-	{
-		if(APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-		{
-			PlayerController->SetViewTarget(CameraSubsystem->GetCamera());
-		}	
-	}
+		CameraSubsystem->RegisterPlayerToCamera(this);
 }
 
 void ACrashPlayerCharacter::Move(const FInputActionValue& Value)
