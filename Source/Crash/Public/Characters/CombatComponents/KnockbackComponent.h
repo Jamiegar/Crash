@@ -30,9 +30,19 @@ public:
 	UFUNCTION()
 	void ScrewTimelineUpdate(float InterpValue);
 
+	UFUNCTION()
+	void StartFaceVelocityDirection();
+
+	UFUNCTION()
+	void StopFaceVelocity();
+
 private:
-	virtual void BeginPlay() override;
+	FTimerHandle FaceVectorDirectionTimerHandle;
+
+	UFUNCTION()
+	void FaceVelocityDirection() const;
 	
+	virtual void BeginPlay() override;
 	
 	ACrashCharacter* OwnerCharacter;
 	

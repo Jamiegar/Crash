@@ -44,6 +44,8 @@ void UKnockBackAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle, c
 {
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 
+	TargetCharacter->GetKnockbackComponent()->StopFaceVelocity();
+	
 	FGameplayTagContainer KnockbackTagContainer;
 	TArray<FString> Tags;
 	Tags.Add("Player.Damaged.Knockback");
@@ -79,6 +81,7 @@ void UKnockBackAbility::OnReceivedKnockbackData(FGameplayEventData Payload)
 		
 		TargetCharacter->LaunchCharacter(LaunchVelocity, true, true);
 		TargetCharacter->bIsKnockedBack = true;
+		TargetCharacter->GetKnockbackComponent()->StartFaceVelocityDirection();
 
 		const FGameplayTag GroundedTag = FGameplayTag::RequestGameplayTag("Player.State.Grounded");
 		AsyncEventWaitUntilGrounded = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, GroundedTag, nullptr, true, true);
@@ -88,15 +91,11 @@ void UKnockBackAbility::OnReceivedKnockbackData(FGameplayEventData Payload)
 	
 }
 
-
 void UKnockBackAbility::OnCharacterGrounded(FGameplayEventData Payload)
 {
 	WaitAsyncKncokbackEnd = UAbilityTask_WaitDelay::WaitDelay(this, KnockbackData->KnockbackGroundedDuration);
 	WaitAsyncKncokbackEnd->OnFinish.AddUniqueDynamic(this, &UKnockBackAbility::OnKnockbackGroundedFinished);
 	WaitAsyncKncokbackEnd->Activate();
-
-	
-	TargetCharacter->GetKnockbackComponent()->StopScrew();
 }
 
 void UKnockBackAbility::OnKnockbackGroundedFinished()
@@ -107,7 +106,8 @@ void UKnockBackAbility::OnKnockbackGroundedFinished()
 
 		AnimInstance->Montage_Play(GetUpMontage, 1);
 	}
-
+	
+	TargetCharacter->GetKnockbackComponent()->StopFaceVelocity();
 	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef(), true, false);
 
 	FGameplayTagContainer KnockbackTagContainer;

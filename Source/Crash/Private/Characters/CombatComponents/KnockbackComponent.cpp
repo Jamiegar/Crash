@@ -50,17 +50,36 @@ void UKnockbackComponent::ScrewTimelineUpdate(float InterpValue)
 	OwnerCharacter->GetMeshAttachmentPoint()->SetRelativeRotation(NewRotation);
 }
 
+void UKnockbackComponent::StartFaceVelocityDirection()
+{
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+	
+	TimerManager.SetTimer(FaceVectorDirectionTimerHandle, this, 
+		&UKnockbackComponent::FaceVelocityDirection, 0.01f, true);
+	
+}
+
+void UKnockbackComponent::StopFaceVelocity()
+{
+	GetWorld()->GetTimerManager().ClearTimer(FaceVectorDirectionTimerHandle);
+	OwnerCharacter->GetMeshAttachmentPoint()->SetRelativeRotation(FRotator());
+}
+
+void UKnockbackComponent::FaceVelocityDirection() const
+{
+	FVector VelocityDir = OwnerCharacter->GetVelocity() * -1;
+	VelocityDir.Normalize();
+	
+	const FRotator Current = OwnerCharacter->GetMeshAttachmentPoint()->GetRelativeRotation();
+	const FRotator TargetRotation = UKismetMathLibrary::MakeRotFromX(VelocityDir);
+	
+	const FRotator NewRotation = UKismetMathLibrary::RInterpTo(Current, TargetRotation, GetWorld()->DeltaTimeSeconds, 50);
+	OwnerCharacter->GetMeshAttachmentPoint()->SetRelativeRotation(NewRotation);
+}
+
 void UKnockbackComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	OwnerCharacter = CastChecked<ACrashCharacter>(GetOwner());
 }
-
-
-
-
-
-
-
-

@@ -7,6 +7,9 @@
 #include "GAS/CrashGameplayTags.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Subsystems/CameraSubsystem.h"
+#include "InputMappingContext.h"
+#include "Characters/Input/InputConfig.h"
+
 
 
 
@@ -15,6 +18,26 @@ ACrashPlayerCharacter::ACrashPlayerCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> MovementMappingContext
+		(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Blueprints/Characters/Input/IMC_CrashMovement.IMC_CrashMovement'"));
+
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> CombatMappingContext
+		(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Blueprints/Characters/Input/IMC_CrashCombat.IMC_CrashCombat'"));
+
+	FMappingContextData MovementData;
+	MovementData.MappingContext = MovementMappingContext.Object;
+
+	FMappingContextData CombatData;
+	CombatData.MappingContext = CombatMappingContext.Object;
+	
+	DefaultInputMappings.Add(MovementData);
+	DefaultInputMappings.Add(CombatData);
+
+	static ConstructorHelpers::FObjectFinder<UInputConfig> DefaultInputConfig
+		(TEXT("/Script/Crash.InputConfig'/Game/Blueprints/Characters/Input/DA_CharacterInputConfig.DA_CharacterInputConfig'"));
+
+	InputConfig = DefaultInputConfig.Object;
 }
 
 void ACrashPlayerCharacter::InitializePlayerCharacter()

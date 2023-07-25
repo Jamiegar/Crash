@@ -1,8 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
-
-#include "CoreMinimal.h"
+﻿#include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
 /**
@@ -25,7 +21,13 @@ public:
 	FReply OnCreateCharacterButtonClicked();
 
 	TSharedRef<SWidget> GenerateAssetPicker();
-	void OnAssetSelected(const FAssetData& Data);
+	void OnClassPicked(UClass* SelectedClass);
 	void OnPropertyChanged(const FAssetData& Data);
+
+
+private:
+	TSharedPtr<STextBlock> CharacterTextBox;
+	
+	ACharacter* SelectedCharacter = nullptr;
 };
 

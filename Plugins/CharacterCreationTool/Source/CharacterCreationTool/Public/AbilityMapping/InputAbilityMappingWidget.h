@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
+class SClassViewer;
 class UGameplayAbility;
 /**
  * 
@@ -23,10 +24,7 @@ public:
 	void Construct(const FArguments& InArgs);
 
 	TSharedRef<SWidget> OnMappingButtonClicked();
-	void OnSelctedAsset(const FAssetData& Data);
 
 private:
-	TArray<TSharedPtr<UGameplayAbility>> Items;
-
-	void OnClassPicked(UClass* PickedClass);
+	void OnClassPicked(UClass* SelectedClass);
 };

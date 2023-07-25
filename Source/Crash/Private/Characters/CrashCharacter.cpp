@@ -12,6 +12,7 @@
 #include "GAS/Effects/AirborneEffect.h"
 #include "GAS/Effects/GroundedEffect.h"
 #include "Components/TimelineComponent.h"
+#include "GAS/Abiliities/Combat/AirAttackAbility.h"
 #include "GAS/Abiliities/Combat/Damage/DeathEffect.h"
 #include "GAS/Abiliities/Combat/Damage/RespawnAbility.h"
 
@@ -23,7 +24,7 @@ ACrashCharacter::ACrashCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	ACrashCharacter::SetUpDefaultMovementValues();
 	
-	AbilityComponent = CreateDefaultSubobject<UCrashAbilitySystemComponent>("Ability Component");
+	AbilityComponent = CreateDefaultSubobject<UAbilitySystemComponent>("Ability Component");
 	BasicCombatComponent = CreateDefaultSubobject<UBasicCombatComponent>("Basic Combat Component");
 	KnockbackComponent = CreateDefaultSubobject<UKnockbackComponent>("Knockback Component");
 
@@ -38,6 +39,8 @@ ACrashCharacter::ACrashCharacter()
 	
 	AddDefaultAbilities();
 	SetDefaultMesh();
+
+	
 }
 
 void ACrashCharacter::SetDefaultMesh() const
@@ -70,6 +73,7 @@ void ACrashCharacter::AddDefaultAbilities()
 	DefaultAbilities.Add(UJumpAbility::StaticClass());
 	DefaultAbilities.Add(UBlockAbility::StaticClass());
 	DefaultAbilities.Add(USlideAbility::StaticClass());
+	DefaultAbilities.Add(UAirAttackAbility::StaticClass());
 	
 	if(BasicCombatComponent)
 	{

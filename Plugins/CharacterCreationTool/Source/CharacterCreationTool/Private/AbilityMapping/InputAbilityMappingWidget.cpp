@@ -2,31 +2,11 @@
 
 
 #include "AbilityMapping/InputAbilityMappingWidget.h"
-#include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
 #include "SlateOptMacros.h"
 #include "Abilities/GameplayAbility.h"
+#include "Filter/FClassPickerViewFilter.h"
 
-class FGameplayAbilityClassFilter : public IClassViewerFilter
-{
-public:
-	TSet<const UClass*> AllowedClass;
-	
-	virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
-	{
-		if(InFilterFuncs->IfInChildOfClassesSet(AllowedClass, InClass) != EFilterReturn::Failed)
-		{
-			return true;
-		}
-		return false;
-	}
-
-	virtual bool IsUnloadedClassAllowed(const FClassViewerInitializationOptions& InInitOptions,const TSharedRef<const IUnloadedBlueprintData> InUnloadedClassData,
-		TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
-	{
-		return InFilterFuncs->IfInChildOfClassesSet(AllowedClass, InUnloadedClassData) != EFilterReturn::Failed;
-	}
-};
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -51,11 +31,12 @@ TSharedRef<SWidget> SInputAbilityMappingWidget::OnMappingButtonClicked()
 {
 	FClassViewerModule& ClassViewerModule = FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer");
 
-	const TSharedRef<FGameplayAbilityClassFilter> ClassFilter = MakeShared<FGameplayAbilityClassFilter>();
+	const TSharedRef<FClassPickerViewFilter> ClassFilter = MakeShared<FClassPickerViewFilter>();
 	ClassFilter.Get().AllowedClass.Add(UGameplayAbility::StaticClass());  
 
 	FClassViewerInitializationOptions Options;
 	Options.ClassFilters.Add(ClassFilter);
+	Options.Mode = EClassViewerMode::Type::ClassPicker;
 
 	const TSharedRef<SWidget> ClassViewer = ClassViewerModule.CreateClassViewer(Options, FOnClassPicked::CreateRaw(this, &SInputAbilityMappingWidget::OnClassPicked));
 	
@@ -68,15 +49,11 @@ TSharedRef<SWidget> SInputAbilityMappingWidget::OnMappingButtonClicked()
 		];
 }
 
-void SInputAbilityMappingWidget::OnSelctedAsset(const FAssetData& Data)
+void SInputAbilityMappingWidget::OnClassPicked(UClass* SelectedClass)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Selected CLass = %s"), *SelectedClass->GetName())
+	
 }
-
-void SInputAbilityMappingWidget::OnClassPicked(UClass* PickedClass)
-{
-}
-
-
 
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

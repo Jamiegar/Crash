@@ -33,10 +33,13 @@ public:
 	
 	
 protected:
-	bool CommitCrashAbility();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Crash|Ability Activation")
 	ECrashActivationPolicy ActivationPolicy;
+	
+	bool CommitCrashAbility();
+
+	void EndCrashAbility();
 
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 

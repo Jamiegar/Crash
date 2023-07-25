@@ -2,20 +2,16 @@
 
 
 #include "CharacterMenuBar.h"
-#include "ContentBrowserModule.h"
-#include "IContentBrowserSingleton.h"
+#include "ClassViewerModule.h"
 #include "SlateOptMacros.h"
-#include "AbilityMapping/InputAbilityMappingWidget.h"
+#include "Filter/FClassPickerViewFilter.h"
+#include "GameFramework/Character.h"
 
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-
 void SCharacterMenuBar::Construct(const FArguments& InArgs)
 {
-	AssetThumbnailPool = MakeShareable(new FAssetThumbnailPool(24));
-	
-	
 	ChildSlot
 	[
 		SNew(SHorizontalBox)
@@ -25,7 +21,7 @@ void SCharacterMenuBar::Construct(const FArguments& InArgs)
 			SNew(SComboButton)
 			.ButtonContent()
 			[
-				SNew(STextBlock)
+				SAssignNew(CharacterTextBox, STextBlock)
 				.Text(FText::FromString("Current Character Selected"))
 			]
 			.OnGetMenuContent(this, &SCharacterMenuBar::GenerateAssetPicker)
@@ -63,36 +59,38 @@ FReply SCharacterMenuBar::OnCreateCharacterButtonClicked()
 
 TSharedRef<SWidget> SCharacterMenuBar::GenerateAssetPicker()
 {
-	const UClass* AllowedClass = Cast<UClass>(UBlueprint::StaticClass());
-	const FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser"));
+	FClassViewerModule& ClassViewerModule = FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer");
+
+	TSharedRef<FClassPickerViewFilter> ClassFilter = MakeShared<FClassPickerViewFilter>();
+	ClassFilter.Get().AllowedClass.Add(ACharacter::StaticClass());  
+
+	FClassViewerInitializationOptions Options;
 	
-	FAssetPickerConfig PickerConfig;
-	PickerConfig.Filter.ClassPaths.Add(AllowedClass->GetClassPathName());
-	PickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP(this, &SCharacterMenuBar::OnAssetSelected);
-	PickerConfig.bAllowNullSelection = true;
-	PickerConfig.Filter.bRecursiveClasses = true;
-	PickerConfig.InitialAssetViewType = EAssetViewType::List;
-	PickerConfig.bAllowDragging = false;
-	PickerConfig.bCanShowFolders = true;
-	PickerConfig.bCanShowClasses = true;
-	
+	Options.ClassFilters.Add(ClassFilter);
+
+	const TSharedRef<SWidget> ClassViewer = ClassViewerModule.CreateClassViewer(Options, FOnClassPicked::CreateRaw(this, &SCharacterMenuBar::OnClassPicked));
 	
 	return
 		SNew(SBox)
 		.HeightOverride(300)
 		.WidthOverride(300)
 		[
-			SNew(SBorder)
-			.BorderImage(FAppStyle::GetBrush("Menu.Background"))
-			[
-				ContentBrowserModule.Get().CreateAssetPicker(PickerConfig)
-			]
+			ClassViewer
 		];
-
 }
 
-void SCharacterMenuBar::OnAssetSelected(const FAssetData& Data)
+void SCharacterMenuBar::OnClassPicked(UClass* SelectedClass)
 {
+	SelectedCharacter = Cast<ACharacter>(SelectedClass->GetDefaultObject<ACharacter>());
+	
+	if(SelectedCharacter)
+	{
+		CharacterTextBox.Get()->SetText(FText::FromString(SelectedClass->GetName()));
+		UE_LOG(LogTemp, Warning, TEXT("Selected Character = %s"), *SelectedCharacter->GetName());
+	}
+	
+	
+	FSlateApplication::Get().DismissAllMenus();
 }
 
 void SCharacterMenuBar::OnPropertyChanged(const FAssetData& Data)
