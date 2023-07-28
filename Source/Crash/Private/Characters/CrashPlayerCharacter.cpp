@@ -4,14 +4,56 @@
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Characters/Input/CrashEnhancedInputComponent.h"
-#include "GAS/CrashGameplayTags.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Subsystems/CameraSubsystem.h"
 #include "InputMappingContext.h"
-#include "Characters/Input/InputConfig.h"
+#include "Characters/Input/InputAbilityMap.h"
+#include "GAS/Abiliities/Combat/Basic/BlockAbility.h"
+#include "GAS/Abiliities/Combat/Basic/ComboBasic.h"
+#include "GAS/Abiliities/Combat/Basic/DownBasic.h"
+#include "GAS/Abiliities/Combat/Basic/MiddleBasic.h"
+#include "GAS/Abiliities/Combat/Basic/SlideAbility.h"
+#include "GAS/Abiliities/Combat/Basic/UpBasic.h"
+#include "GAS/Abiliities/Movement/JumpAbility.h"
 
 
+#define LOCTEXT_NAMESPACE "FAbilityInputMap"
 
+void FAbilityInputMap::LoadDefaults()
+{
+	// --- Find Default Input Actions --------------------------------
+	UInputAction* BasicNeutralInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_BasicAttack.IA_BasicAttack"));
+	UInputAction* BasicUpInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_BasicUpAttack.IA_BasicUpAttack"));
+	UInputAction* BasicLeftInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_BasicLeftAttack.IA_BasicLeftAttack"));
+	UInputAction* BasicRightInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_BasicRightAttack.IA_BasicRightAttack"));
+	UInputAction* BasicDownInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_BasicDownAttack.IA_BasicDownAttack"));
+	UInputAction* BlockInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_Block.IA_Block"));
+	UInputAction* SlideInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_Slide.IA_Slide"));
+	UInputAction* JumpInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/MovementInput/IA_Jump.IA_Jump"));
+
+	// --- Find Default Abilities ------------------------------------
+
+	const UComboBasic* ComboBasic = LoadObject<UComboBasic>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.ComboBasic'"));
+	const UUpBasic* BasicUpAttack = LoadObject<UUpBasic>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.UpBasic'"));
+	const UMiddleBasic* BasicMiddleAttack = LoadObject<UMiddleBasic>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.MiddleBasic'"));
+	const UDownBasic* BasicDownAttack = LoadObject<UDownBasic>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.DownBasic'"));
+	const UBlockAbility* BlockAbility = LoadObject<UBlockAbility>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.BlockAbility'"));
+	const USlideAbility* SlideAbility = LoadObject<USlideAbility>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.SlideAbility'"));
+	const UJumpAbility* JumpAbility = LoadObject<UJumpAbility>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.JumpAbility'"));
+
+	
+	// --- Default Input Ability Actions ------------------------------
+	AbilityInputMappingLayout.Add(BasicLeftInput, BasicMiddleAttack->StaticClass());
+	AbilityInputMappingLayout.Add(BasicRightInput, BasicMiddleAttack->StaticClass());
+	AbilityInputMappingLayout.Add(BlockInput, BlockAbility->StaticClass());
+	AbilityInputMappingLayout.Add(JumpInput, JumpAbility->StaticClass());
+	AbilityInputMappingLayout.Add(BasicUpInput, BasicUpAttack->StaticClass());
+	AbilityInputMappingLayout.Add(BasicDownInput, BasicDownAttack->StaticClass());
+	AbilityInputMappingLayout.Add(SlideInput, SlideAbility->StaticClass());
+	AbilityInputMappingLayout.Add(BasicNeutralInput, ComboBasic->StaticClass());
+}
+
+#undef LOCTEXT_NAMESPACE
 
 // Sets default values
 ACrashPlayerCharacter::ACrashPlayerCharacter()
@@ -34,10 +76,23 @@ ACrashPlayerCharacter::ACrashPlayerCharacter()
 	DefaultInputMappings.Add(MovementData);
 	DefaultInputMappings.Add(CombatData);
 
-	static ConstructorHelpers::FObjectFinder<UInputConfig> DefaultInputConfig
-		(TEXT("/Script/Crash.InputConfig'/Game/Blueprints/Characters/Input/DA_CharacterInputConfig.DA_CharacterInputConfig'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> DefaultMovementAction
+		(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/Characters/Input/MovementInput/IA_MovementLeftRight.IA_MovementLeftRight'"));
 
-	InputConfig = DefaultInputConfig.Object;
+	MovementAction = DefaultMovementAction.Object;
+
+	InputAbilityMap.LoadDefaults();
+
+	/*static ConstructorHelpers::FObjectFinder<UInputAbilityMap> DefaultAbilityInputMapping
+		(TEXT("/Script/Crash.InputAbilityMap'/Game/Blueprints/Characters/Input/DA_DefaultAbilityMap.DA_DefaultAbilityMap'"));
+
+	InputAbilityMap = DefaultAbilityInputMapping.Object;*/
+}
+
+void ACrashPlayerCharacter::PostInitProperties()
+{
+	Super::PostInitProperties();
+	
 }
 
 void ACrashPlayerCharacter::InitializePlayerCharacter()
@@ -71,44 +126,32 @@ void ACrashPlayerCharacter::Move(const FInputActionValue& Value)
 	AddMovementInput(ForwardDirection, AxisValue, true);
 }
 
-void ACrashPlayerCharacter::JumpInputActivate(const FInputActionValue& Value)
+void ACrashPlayerCharacter::OnAbilityInputPressed(const FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const UInputAction* SourceAction)
 {
-	SendLocalInputToAbilityComponent(EAbilityInputID::MovementJump);
+	const TSubclassOf<UCrashGameplayAbility>* AbilityMap = InputAbilityMap.AbilityInputMappingLayout.Find(SourceAction);
+	const EAbilityInputID InputID = AbilityMap->Get()->GetDefaultObject<UCrashGameplayAbility>()->AbilityInputID;
+	SendLocalInputToAbilityComponent(InputID);
+
+	UE_LOG(LogTemp, Warning, TEXT("Action: %s pressed, Activated: %s"), *SourceAction->GetName(), *AbilityMap->Get()->GetName());
 }
 
-void ACrashPlayerCharacter::BasicMiddleAttackInput(const FInputActionValue& Value)
+void ACrashPlayerCharacter::OnAbilityInputReleased(const FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const UInputAction* SourceAction)
 {
-	SendLocalInputToAbilityComponent(EAbilityInputID::BasicAttackMiddle);
+	const TSubclassOf<UCrashGameplayAbility>* AbilityMap = InputAbilityMap.AbilityInputMappingLayout.Find(SourceAction);
+	const EAbilityInputID InputID = AbilityMap->Get()->GetDefaultObject<UCrashGameplayAbility>()->AbilityInputID;
+	SendLocalInputToAbilityComponent(InputID, false);
 }
 
-void ACrashPlayerCharacter::BasicUpAttackInput(const FInputActionValue& Value)
+void ACrashPlayerCharacter::BindAbiltiesToInput(UCrashEnhancedInputComponent* CrashInputComponent)
 {
-	SendLocalInputToAbilityComponent(EAbilityInputID::BasicAttackUp);
-}
-
-void ACrashPlayerCharacter::BasicDownAttackInput(const FInputActionValue& Value)
-{
-	SendLocalInputToAbilityComponent(EAbilityInputID::BasicAttackDown);
-}
-
-void ACrashPlayerCharacter::BasicAttackInput(const FInputActionValue& Value)
-{
-	SendLocalInputToAbilityComponent(EAbilityInputID::BasicAttack);
-}
-
-void ACrashPlayerCharacter::BasicBlockInputPressed(const FInputActionValue& Value)
-{
-	SendLocalInputToAbilityComponent(EAbilityInputID::Block);
-}
-
-void ACrashPlayerCharacter::BasicBlockInputReleased(const FInputActionValue& Value)
-{
-	SendLocalInputToAbilityComponent(EAbilityInputID::Block, false);
-}
-
-void ACrashPlayerCharacter::SlideInputPressed(const FInputActionValue& Value)
-{
-	SendLocalInputToAbilityComponent(EAbilityInputID::Slide);
+	TArray<UInputAction*> AbilityInputActions;
+	InputAbilityMap.AbilityInputMappingLayout.GetKeys(AbilityInputActions);
+	
+	for (const UInputAction* Action : AbilityInputActions)
+	{
+		CrashInputComponent->BindAction(Action, ETriggerEvent::Started, this, "OnAbilityInputPressed");
+		CrashInputComponent->BindAction(Action, ETriggerEvent::Completed, this, "OnAbilityInputReleased");
+	}
 }
 
 void ACrashPlayerCharacter::SendLocalInputToAbilityComponent(const EAbilityInputID InputID, bool bWasPressed)
@@ -129,19 +172,8 @@ void ACrashPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	
 	if(UCrashEnhancedInputComponent* CrashInputComponent = CastChecked<UCrashEnhancedInputComponent>(PlayerInputComponent))
 	{
-		const FCrashGameplayTags& GameplayTags = FCrashGameplayTags::Get();
-
-		
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Movement, ETriggerEvent::Triggered, this, &ACrashPlayerCharacter::Move);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Jump, ETriggerEvent::Started, this, &ACrashPlayerCharacter::JumpInputActivate);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.LeftBasicAttack, ETriggerEvent::Started, this, &ACrashPlayerCharacter::BasicMiddleAttackInput);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.RightBasicAttack, ETriggerEvent::Started, this, &ACrashPlayerCharacter::BasicMiddleAttackInput);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.UpBasicAttack, ETriggerEvent::Started, this, &ACrashPlayerCharacter::BasicUpAttackInput);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.DownBasicAttack, ETriggerEvent::Started, this, &ACrashPlayerCharacter::BasicDownAttackInput);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.BasicAttack, ETriggerEvent::Started, this, &ACrashPlayerCharacter::BasicAttackInput);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Block, ETriggerEvent::Started, this, &ACrashPlayerCharacter::BasicBlockInputPressed);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Block, ETriggerEvent::Completed, this, &ACrashPlayerCharacter::BasicBlockInputReleased);
-		CrashInputComponent->BindActionByTag(InputConfig, GameplayTags.Slide, ETriggerEvent::Started, this, &ACrashPlayerCharacter::SlideInputPressed);
+		CrashInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ACrashPlayerCharacter::Move);
+		BindAbiltiesToInput(CrashInputComponent);
 	}
 }
 

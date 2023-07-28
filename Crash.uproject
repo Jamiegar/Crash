@@ -14,6 +14,11 @@
 				"EnhancedInput"
 			]
 		},
+		{
+			"Name": "CharacterTool",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
 	],
 	"Plugins": [
 		{
@@ -26,6 +31,10 @@
 		{
 			"Name": "GameplayAbilities",
 			"Enabled": true
+		},
+		{
+			"Name": "CharacterCreationTool",
+			"Enabled": false
 		}
 	]
 }

@@ -7,10 +7,22 @@
 #include "Characters/Input/AbilitySystemInputID.h"
 #include "CrashPlayerCharacter.generated.h"
 
-
+class UComboBasic;
+class UInputAbilityMap;
 class UCrashEnhancedInputComponent;
-class UInputConfig;
 class UInputMappingContext;
+
+USTRUCT(Blueprintable)
+struct CRASH_API FAbilityInputMap
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TMap<UInputAction*, TSubclassOf<UCrashGameplayAbility>> AbilityInputMappingLayout;
+
+	void LoadDefaults();
+};
+
 
 USTRUCT(DisplayName="Default Mapping Context Data", BlueprintType)
 struct FMappingContextData
@@ -33,14 +45,21 @@ public:
 	// Sets default values for this character's properties
 	ACrashPlayerCharacter();
 
+	virtual void PostInitProperties() override;
 	void InitializePlayerCharacter();
+
+	UFUNCTION(BlueprintCallable, BlueprintGetter)
+	FAbilityInputMap& GetInputAbilityMap() { return InputAbilityMap; }
 
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Input")
 	TArray<FMappingContextData> DefaultInputMappings;
+
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	UInputAction* MovementAction;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
-	UInputConfig* InputConfig;
+	FAbilityInputMap InputAbilityMap;
 
 	UPROPERTY()
 	UCrashEnhancedInputComponent* CrashEnhancedInputComponent;
@@ -48,17 +67,16 @@ protected:
 	void SetupCameraView() const;
 	
 	void Move(const FInputActionValue& Value);
-	void JumpInputActivate(const FInputActionValue& Value);
-	void BasicMiddleAttackInput(const FInputActionValue& Value);
-	void BasicUpAttackInput(const FInputActionValue& Value);
-	void BasicDownAttackInput(const FInputActionValue& Value);
-	void BasicAttackInput(const FInputActionValue& Value);
-	void BasicBlockInputPressed(const FInputActionValue& Value);
-	void BasicBlockInputReleased(const FInputActionValue& Value);
-	void SlideInputPressed(const FInputActionValue& Value);
-
-	void SendLocalInputToAbilityComponent(const EAbilityInputID InputID, bool bWasPressed = true);
 	
+	UFUNCTION()
+	void OnAbilityInputPressed(const FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const UInputAction* SourceAction);
+
+	UFUNCTION()
+	void OnAbilityInputReleased(const FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const UInputAction* SourceAction);
+
+	void BindAbiltiesToInput(UCrashEnhancedInputComponent* CrashInputComponent);
+	void SendLocalInputToAbilityComponent(const EAbilityInputID InputID, bool bWasPressed = true);
+
 public:
 	
 	// Called to bind functionality to input

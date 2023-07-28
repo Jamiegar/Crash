@@ -11,5 +11,6 @@ public class CrashEditorTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_1;
 		ExtraModuleNames.Add("Crash");
+		ExtraModuleNames.Add("CharacterTool");
 	}
 }

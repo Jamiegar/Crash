@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "GAS/CrashAbilitySystemComponent.h"
 #include "GAS/CrashAttributeSet.h"
 #include "CrashCharacter.generated.h"
 
@@ -74,7 +75,7 @@ protected:
 	TArray<TSubclassOf<UCrashGameplayAbility>> DefaultAbilities;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category= "Abilities")
-	UAbilitySystemComponent* AbilityComponent;
+	UCrashAbilitySystemComponent* AbilityComponent;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Abilities")
 	UBasicCombatComponent* BasicCombatComponent;

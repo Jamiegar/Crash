@@ -24,5 +24,4 @@ void UUpBasic::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FG
 	const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	UE_LOG(LogTemp, Warning, TEXT("UpAttack"));
 }
