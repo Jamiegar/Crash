@@ -17,9 +17,12 @@ public:
 
 private:
 
-	TSharedRef<class SDockTab> OnSpawnToolTab(const class FSpawnTabArgs& SpawnTabArgs);
-
-	void RegisterMenus();
-
 	TSharedPtr<class FUICommandList> ToolCommands;
+	
+	TSharedRef<class SDockTab> OnSpawnToolTab(const class FSpawnTabArgs& SpawnTabArgs);
+	void RegisterMenus();
+	void AddToolbarExtension(FToolBarBuilder& Builder);
+	
+
 };
+

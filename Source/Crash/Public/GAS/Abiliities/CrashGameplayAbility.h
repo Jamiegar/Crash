@@ -16,7 +16,7 @@ enum class ECrashActivationPolicy : uint8
 	OnSpawn
 };
 
-UCLASS(Abstract)
+UCLASS(Abstract, Blueprintable)
 class CRASH_API UCrashGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()

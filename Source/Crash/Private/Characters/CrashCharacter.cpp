@@ -2,7 +2,7 @@
 
 
 #include "Characters/CrashCharacter.h"
-#include "Characters/CombatComponents/BasicCombatComponent.h"
+#include "Characters/CombatComponents/CombatComponent.h"
 #include "Characters/CombatComponents/KnockbackComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -26,7 +26,7 @@ ACrashCharacter::ACrashCharacter()
 	ACrashCharacter::SetUpDefaultMovementValues();
 	
 	AbilityComponent = CreateDefaultSubobject<UCrashAbilitySystemComponent>("Ability Component");
-	BasicCombatComponent = CreateDefaultSubobject<UBasicCombatComponent>("Basic Combat Component");
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>("Basic Combat Component");
 	KnockbackComponent = CreateDefaultSubobject<UKnockbackComponent>("Knockback Component");
 
 	MeshAttachment = CreateDefaultSubobject<USceneComponent>("Mesh Attachment");
@@ -75,12 +75,6 @@ void ACrashCharacter::AddDefaultAbilities()
 	DefaultAbilities.Add(UBlockAbility::StaticClass());
 	DefaultAbilities.Add(USlideAbility::StaticClass());
 	DefaultAbilities.Add(UAirAttackAbility::StaticClass());
-	
-	if(BasicCombatComponent)
-	{
-		for (auto BasicCombat : BasicCombatComponent->BasicCombatAbilities)
-			DefaultAbilities.Add(BasicCombat);
-	}
 }
 
 UCrashAttributeSet* ACrashCharacter::GetCrashAttributeSet() const
@@ -175,6 +169,11 @@ void ACrashCharacter::SetUpDefaultMovementValues()
 		MovementComponent->FallingLateralFriction = 1.0f;
 		MovementComponent->bApplyGravityWhileJumping = false;
 		MovementComponent->RotationRate = FRotator(0,1500.0f,0);
+
+		MovementComponent->SetPlaneConstraintAxisSetting(EPlaneConstraintAxisSetting::Y);
+		MovementComponent->SetPlaneConstraintNormal(FVector(0, 1, 0));
+		MovementComponent->bConstrainToPlane = true;
+		
 	}
 }
 

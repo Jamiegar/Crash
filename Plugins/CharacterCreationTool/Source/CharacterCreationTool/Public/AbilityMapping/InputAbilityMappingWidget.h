@@ -26,5 +26,5 @@ public:
 	TSharedRef<SWidget> OnMappingButtonClicked();
 
 private:
-	void OnClassPicked(UClass* SelectedClass);
+	void OnClassPicked(UClass* SelectedAbility);
 };

@@ -15,7 +15,8 @@ public class CharacterTool : ModuleRules
 			"Engine", 
 			"InputCore",
 			"Crash",
-			"EnhancedInput"
+			"EnhancedInput",
+			"EditorWidgets"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
@@ -25,7 +26,8 @@ public class CharacterTool : ModuleRules
 			"UnrealEd",
 			"ToolMenus",
 			"Slate",
-			"SlateCore",
+			"SlateCore", 
+			"DesktopWidgets",
 		});
 		
 		PublicIncludePaths.AddRange(new string[]

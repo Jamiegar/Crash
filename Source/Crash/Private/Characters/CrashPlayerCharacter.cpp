@@ -18,7 +18,6 @@
 
 
 #define LOCTEXT_NAMESPACE "FAbilityInputMap"
-
 void FAbilityInputMap::LoadDefaults()
 {
 	// --- Find Default Input Actions --------------------------------
@@ -52,7 +51,6 @@ void FAbilityInputMap::LoadDefaults()
 	AbilityInputMappingLayout.Add(SlideInput, SlideAbility->StaticClass());
 	AbilityInputMappingLayout.Add(BasicNeutralInput, ComboBasic->StaticClass());
 }
-
 #undef LOCTEXT_NAMESPACE
 
 // Sets default values
@@ -82,23 +80,14 @@ ACrashPlayerCharacter::ACrashPlayerCharacter()
 	MovementAction = DefaultMovementAction.Object;
 
 	InputAbilityMap.LoadDefaults();
-
-	/*static ConstructorHelpers::FObjectFinder<UInputAbilityMap> DefaultAbilityInputMapping
-		(TEXT("/Script/Crash.InputAbilityMap'/Game/Blueprints/Characters/Input/DA_DefaultAbilityMap.DA_DefaultAbilityMap'"));
-
-	InputAbilityMap = DefaultAbilityInputMapping.Object;*/
+	GiveInputMapAbilitiesToCharacter();
 }
 
-void ACrashPlayerCharacter::PostInitProperties()
-{
-	Super::PostInitProperties();
-	
-}
 
 void ACrashPlayerCharacter::InitializePlayerCharacter()
 {
 	SetupCameraView();
-
+	
 	// Add input mapping context to player 
 	if(const APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -109,6 +98,26 @@ void ACrashPlayerCharacter::InitializePlayerCharacter()
 				LocalPlayerSubsystem->AddMappingContext(ContextData.MappingContext, ContextData.Priority);
 			}
 		}
+	}
+}
+
+void ACrashPlayerCharacter::PossessedBy(AController* NewController)
+{
+	GiveInputMapAbilitiesToCharacter();
+	Super::PossessedBy(NewController);
+}
+
+void ACrashPlayerCharacter::GiveInputMapAbilitiesToCharacter()
+{
+	TArray<TSubclassOf<UCrashGameplayAbility>> AbilityArray;
+	InputAbilityMap.AbilityInputMappingLayout.GenerateValueArray(AbilityArray);
+
+	for (auto Ability : AbilityArray)
+	{
+		if(DefaultAbilities.Contains(Ability))
+			continue;
+
+		DefaultAbilities.Add(Ability);
 	}
 }
 

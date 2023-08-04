@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbilityTypes.h"
 #include "Components/ActorComponent.h"
-#include "BasicCombatComponent.generated.h"
+#include "CombatComponent.generated.h"
 
 
 struct FGameplayEventData;
@@ -14,16 +14,13 @@ class UAbilitySystemComponent;
 class ACrashCharacter;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class CRASH_API UBasicCombatComponent : public UActorComponent
+class CRASH_API UCombatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	UBasicCombatComponent();
-
-	UPROPERTY()
-	TArray<TSubclassOf<UCrashGameplayAbility>> BasicCombatAbilities;
-		
+	UCombatComponent();
+	
 	UFUNCTION(BlueprintCallable, Category="Crash Character Owner")
 	ACrashCharacter* GetOwningCrashCharacter() const;
 

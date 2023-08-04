@@ -2,19 +2,23 @@
 
 
 #include "Menus/CharacterMenuBar.h"
+#include "AssetToolsModule.h"
 #include "ClassViewerModule.h"
+#include "PropertyCustomizationHelpers.h"
 #include "SlateOptMacros.h"
 #include "Characters/CrashPlayerCharacter.h"
 #include "Filters/FClassPickerViewFilter.h"
-
-
-
+#include "GAS/Abiliities/CrashGameplayAbility.h"
+#include "AssetTools/Private/AssetTools.h"
+#include "Factories/CrashAbilityFactory.h"
+#include "Factories/CrashCharacterFactory.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SCharacterMenuBar::Construct(const FArguments& InArgs)
 {
 	OnCharacterSelected = InArgs._OnCharacterSelected;
+	AssetThumbnailPool = MakeShareable(new FAssetThumbnailPool(24));
 	
 	ChildSlot
 	[
@@ -45,31 +49,52 @@ void SCharacterMenuBar::Construct(const FArguments& InArgs)
 			.Text(FText::FromString("Create New Character"))
 			.OnClicked(FOnClicked::CreateSP(this, &SCharacterMenuBar::OnCreateCharacterButtonClicked))
 		]
+		/*+SHorizontalBox::Slot()
+		.AutoWidth().VAlign(VAlign_Top) .HAlign(HAlign_Center)
+		[
+			SNew(SObjectPropertyEntryBox)
+			.DisplayBrowse(true)
+			.DisplayThumbnail(true)
+			.EnableContentPicker(true)
+			.AllowedClass(USkeletalMesh::StaticClass())
+			.OnObjectChanged(FOnSetObject::CreateSP(this, &SCharacterMenuBar::OnPropertyValueChanged))
+			.ThumbnailPool(AssetThumbnailPool)
+			.ObjectPath("/Script/Engine.SkeletalMesh'/Game/Assets/PolygonFantasyRivals/Meshes/Characters/SK_Character_SpiritDemon.SK_Character_SpiritDemon'")
+		]*/
 	];
 	
 }
 
 FReply SCharacterMenuBar::OnCreateNewAbilityButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Create New Ability"));
+	const FAssetToolsModule& ToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
+	
+	UCrashAbilityFactory* AbilityFactory = NewObject<UCrashAbilityFactory>();
+	static_cast<UAssetToolsImpl&>(ToolsModule.Get()).CreateAssetWithDialog(UCrashGameplayAbility::StaticClass(), AbilityFactory);
+	
 	return FReply::Handled();
 }
 
+
 FReply SCharacterMenuBar::OnCreateCharacterButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Create New Charater"));
+	const FAssetToolsModule& ToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
+
+	UCrashCharacterFactory* CharacterFactory = NewObject<UCrashCharacterFactory>();
+	static_cast<UAssetToolsImpl&>(ToolsModule.Get()).CreateAssetWithDialog(ACrashPlayerCharacter::StaticClass(), CharacterFactory);
+	
 	return FReply::Handled();
 }
 
 TSharedRef<SWidget> SCharacterMenuBar::GenerateAssetPicker()
 {
+	
 	FClassViewerModule& ClassViewerModule = FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer");
 
 	TSharedRef<FClassPickerViewFilter> ClassFilter = MakeShared<FClassPickerViewFilter>();
 	ClassFilter.Get().AllowedClass.Add(ACrashPlayerCharacter::StaticClass());  
 
 	FClassViewerInitializationOptions Options;
-	
 	Options.ClassFilters.Add(ClassFilter);
 
 	const TSharedRef<SWidget> ClassViewer = ClassViewerModule.CreateClassViewer(Options, FOnClassPicked::CreateRaw(this, &SCharacterMenuBar::OnClassPicked));
@@ -95,8 +120,10 @@ void SCharacterMenuBar::OnClassPicked(UClass* SelectedClass)
 	FSlateApplication::Get().DismissAllMenus();
 }
 
-void SCharacterMenuBar::OnPropertyChanged(const FAssetData& Data)
+
+void SCharacterMenuBar::OnPropertyValueChanged(const FAssetData& AssetData)
 {
+	
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

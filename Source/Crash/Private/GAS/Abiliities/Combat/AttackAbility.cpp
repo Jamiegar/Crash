@@ -2,7 +2,6 @@
 
 
 #include "GAS/Abiliities/Combat/AttackAbility.h"
-
 #include "AbilitySystemGlobals.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "GAS/CrashGameplayTags.h"
@@ -12,6 +11,7 @@
 #include "AbilitySystemComponent.h"
 #include "GAS/Abiliities/Combat/Damage/StunAbility.h"
 #include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
+#include "GAS/Effects/Damaging/HitStopEffect.h"
 
 void UAttackAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -33,6 +33,16 @@ void UAttackAbility::WaitForDamageEffect()
 
 void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
+	/*const FGameplayEffectSpecHandle HitStopHandle = MakeEffectSpecHandleFromAbility(UHitStopEffect::StaticClass());
+
+	if(!HitStopHandle.IsValid())
+		return;
+	
+	FGameplayEffectSpec* HitStopSpec = HitStopHandle.Data.Get();
+	ApplyAbilityTagsToGameplayEffectSpec(*HitStopHandle.Data.Get(), GetCurrentAbilitySpec()); 
+	ApplyGameplayEffectSpecToTargetFromAbility(HitStopHandle, Payload.TargetData);
+	auto ActiveOwnerEffects = ApplyGameplayEffectSpecToOwnerFromAbility(HitStopHandle);*/ 
+	
 	const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
 	const FGameplayEffectSpecHandle Handle = MakeEffectSpecHandleFromAbility(UDamageBasicInstant::StaticClass());
 
@@ -42,7 +52,7 @@ void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 	FGameplayEffectSpec* Spec = Handle.Data.Get();
 	Spec->SetSetByCallerMagnitude(GameTags.PlayerDamaged, AbilityDamage); //Sends the Ability damage to the custom damage execute calculation 
 	ApplyAbilityTagsToGameplayEffectSpec(*Handle.Data.Get(), GetCurrentAbilitySpec()); 
-	auto ActiveGameplayEffectHandles = ApplyGameplayEffectSpecToTargetFromAbility(Handle, Payload.TargetData);
+	ApplyGameplayEffectSpecToTargetFromAbility(Handle, Payload.TargetData);
 }
 
 void UAttackAbility::ApplyKnockbackToTarget(FGameplayEventData Payload)

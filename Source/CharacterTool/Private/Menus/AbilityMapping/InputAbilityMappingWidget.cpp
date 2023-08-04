@@ -4,6 +4,7 @@
 #include "Menus/AbilityMapping/InputAbilityMappingWidget.h"
 #include "ClassViewerModule.h"
 #include "SlateOptMacros.h"
+#include "Characters/CrashPlayerCharacter.h"
 #include "Filters/FClassPickerViewFilter.h"
 #include "GAS/Abiliities/CrashGameplayAbility.h"
 
@@ -18,10 +19,22 @@ void SInputAbilityMappingWidget::Construct(const FArguments& InArgs)
 	ChildSlot
 	[
 		SNew(SComboButton)
+		
 		.ButtonContent()
 		[
-			SNew(SImage)
-			.Image(new FSlateDynamicImageBrush(InArgs._InputImage, FVector2D(64, 64)))
+			SNew(SVerticalBox)
+			+SVerticalBox::Slot()
+			.AutoHeight() .VAlign(VAlign_Center) .HAlign(HAlign_Center) 
+			[
+				SNew(SImage)
+				.Image(new FSlateDynamicImageBrush(InArgs._InputImage, FVector2D(64, 64)))
+			]
+			+SVerticalBox::Slot()
+			.AutoHeight() .VAlign(VAlign_Center) .HAlign(HAlign_Center)
+			[
+				SAssignNew(CurrentAbilityTextBlock, STextBlock)
+				.Text(FText::FromString("None"))
+			]
 		]
 		.OnGetMenuContent(this, &SInputAbilityMappingWidget::OnMappingButtonClicked)
 	];
@@ -50,9 +63,15 @@ TSharedRef<SWidget> SInputAbilityMappingWidget::OnMappingButtonClicked()
 		];
 }
 
-void SInputAbilityMappingWidget::OnClassPicked(UClass* SelectedClass)
+void SInputAbilityMappingWidget::UpdateCharacterAbilityMap(FAbilityInputMap& AbilityInputMap)
 {
-	OnAbilitySelected.ExecuteIfBound(SelectedClass->GetDefaultObject<UCrashGameplayAbility>(), WidgetInputActionType);
+	TSubclassOf<UCrashGameplayAbility>* Ability = AbilityInputMap.AbilityInputMappingLayout.Find(WidgetInputActionType);
+	CurrentAbilityTextBlock.Get()->SetText(FText::FromString(Ability->Get()->GetName()));
+}
+
+void SInputAbilityMappingWidget::OnClassPicked(UClass* SelectedAbility)
+{
+	OnAbilitySelected.ExecuteIfBound(SelectedAbility->GetDefaultObject<UCrashGameplayAbility>(), WidgetInputActionType);
 }
 
 

@@ -12,7 +12,7 @@
 
 class UTimelineComponent;
 class UKnockbackComponent;
-class UBasicCombatComponent;
+class UCombatComponent;
 class UCrashGameplayAbility;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnKillCharacter);
@@ -31,7 +31,7 @@ public:
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilityComponent; };
 	UCrashAttributeSet* GetCrashAttributeSet() const;
-	UBasicCombatComponent* GetBasicCombatComponent() const { return  BasicCombatComponent; }
+	UCombatComponent* GetBasicCombatComponent() const { return  CombatComponent; }
 	UKnockbackComponent* GetKnockbackComponent() const { return KnockbackComponent; }
 	UTimelineComponent* GetTimelineComponent() const { return TimelineComponent; }
 	USceneComponent* GetMeshAttachmentPoint() const {return  MeshAttachment; }
@@ -76,9 +76,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category= "Abilities")
 	UCrashAbilitySystemComponent* AbilityComponent;
-
+	
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Abilities")
-	UBasicCombatComponent* BasicCombatComponent;
+	UCombatComponent* CombatComponent;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Knockback")
 	UKnockbackComponent* KnockbackComponent;

@@ -6,6 +6,7 @@
 #include "Widgets/SCompoundWidget.h"
 
 
+struct FAbilityInputMap;
 class UInputAction;
 class UCrashGameplayAbility;
 class ACrashPlayerCharacter;
@@ -30,9 +31,12 @@ public:
 	void Construct(const FArguments& InArgs);
 	TSharedRef<SWidget> OnMappingButtonClicked();
 
+	void UpdateCharacterAbilityMap(FAbilityInputMap& AbilityInputMap);
+
 private:
+	TSharedPtr<STextBlock> CurrentAbilityTextBlock = nullptr;
 	UInputAction* WidgetInputActionType = nullptr;
 	FSelectedAbility OnAbilitySelected;
 	
-	void OnClassPicked(UClass* SelectedClass);
+	void OnClassPicked(UClass* SelectedAbility);
 };

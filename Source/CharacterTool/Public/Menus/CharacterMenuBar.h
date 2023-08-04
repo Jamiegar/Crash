@@ -24,11 +24,15 @@ public:
 	
 	TSharedRef<SWidget> GenerateAssetPicker();
 	void OnClassPicked(UClass* SelectedClass);
-	void OnPropertyChanged(const FAssetData& Data);
 	
 	FCharacterSelected OnCharacterSelected;
 
 private:
 	TSharedPtr<STextBlock> CharacterTextBox;
+	TSharedPtr<FAssetThumbnailPool> AssetThumbnailPool;
+
+	
+	void OnPropertyValueChanged(const FAssetData& AssetData);
 };
+
 

@@ -1,37 +1,30 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Characters/CombatComponents/BasicCombatComponent.h"
+#include "..\..\..\Public\Characters\CombatComponents\CombatComponent.h"
 #include "Characters/CrashCharacter.h"
 #include "GAS/CrashGameplayTags.h"
-#include "GAS/Abiliities/Combat/Basic/ComboBasic.h"
-#include "GAS/Abiliities/Combat/Basic/DownBasic.h"
-#include "GAS/Abiliities/Combat/Basic/MiddleBasic.h"
-#include "GAS/Abiliities/Combat/Basic/UpBasic.h"
 #include "GAS/Abiliities/Combat/Damage/KnockBackAbility.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 
 // Sets default values for this component's properties
-UBasicCombatComponent::UBasicCombatComponent()
+UCombatComponent::UCombatComponent()
 {
-	BasicCombatAbilities.Add(UMiddleBasic::StaticClass());
-	BasicCombatAbilities.Add(UUpBasic::StaticClass());
-	BasicCombatAbilities.Add(UDownBasic::StaticClass());
-	BasicCombatAbilities.Add(UComboBasic::StaticClass());
+
 }
 
-ACrashCharacter* UBasicCombatComponent::GetOwningCrashCharacter() const
+ACrashCharacter* UCombatComponent::GetOwningCrashCharacter() const
 {
 	return Cast<ACrashCharacter>(GetOwner());
 }
 
-UAbilitySystemComponent* UBasicCombatComponent::GetOwnersAbilitySystemComponent() const
+UAbilitySystemComponent* UCombatComponent::GetOwnersAbilitySystemComponent() const
 {
 	return GetOwningCrashCharacter()->GetAbilitySystemComponent();
 }
 
-bool UBasicCombatComponent::PerformDamageTrace(FName BoneNameLocation)
+bool UCombatComponent::PerformDamageTrace(FName BoneNameLocation)
 {
 	//Get the world location of socket
 	const FVector SocketLocation = GetOwningCrashCharacter()->GetMesh()->GetSocketLocation(BoneNameLocation); 

@@ -6,6 +6,7 @@
 #include "InputAction.h"
 #include "Widgets/SCompoundWidget.h"
 
+class SInputAbilityMappingWidget;
 class UInputAction;
 class UCrashGameplayAbility;
 class ACrashPlayerCharacter;
@@ -30,9 +31,10 @@ public:
 	
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+	void UpdateActionMap(ACrashPlayerCharacter* SelectedCharacter);
 
 private:
-
+	TArray<TSharedPtr<SInputAbilityMappingWidget>> InputAbilityMappingWidgets;
 	FInputActionSelectedAbility OnInputSelectedAbility;
 	
 	FName InputImage_Left;
@@ -50,7 +52,9 @@ private:
 	void GetImagePaths();
 	void SetInputActions(EActionAbilityType Type);
 	
-	UInputAction* LoadInputAction(const FString& InputActionReferencePath);
 	
+	UInputAction* LoadInputAction(const FString& InputActionReferencePath);
+
+	TSharedRef<SInputAbilityMappingWidget> CreateInputAbilityMappingWidget(UInputAction* Action, FName ImagePath);
 	void OnAbilitySelected(UCrashGameplayAbility* SelectedAbility, UInputAction* WidgetAction) const;
 };

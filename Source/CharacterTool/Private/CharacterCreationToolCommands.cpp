@@ -6,7 +6,7 @@
 
 void FCharacterCreationToolCommands::RegisterCommands()
 {
-	UI_COMMAND(OpenPluginWindow, "CharacterCreationTool", "Bring up CharacterCreationTool window", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(OpenToolWindow, "CharacterCreationTool", "Bring up CharacterCreationTool window", EUserInterfaceActionType::Button, FInputChord());
 }
 
 #undef LOCTEXT_NAMESPACE

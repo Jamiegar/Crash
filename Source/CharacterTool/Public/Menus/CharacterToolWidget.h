@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
+class SAbilityActionMap;
 class UInputAction;
 class UCrashGameplayAbility;
 class ACrashPlayerCharacter;
@@ -23,6 +24,8 @@ public:
 
 private:
 	ACrashPlayerCharacter* CharacterSelected = nullptr;
+	TSharedPtr<SAbilityActionMap> BasicAbilityInputMap = nullptr;
+	TSharedPtr<SAbilityActionMap> SpecialAbilityInputMap = nullptr;
 	
 	void OnCharacterSelected(ACrashPlayerCharacter* SelectedCharacter);
 	void OnInputAbilitySelected(UCrashGameplayAbility* SelectedAbility, UInputAction* Action);

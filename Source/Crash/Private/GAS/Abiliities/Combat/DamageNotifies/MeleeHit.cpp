@@ -2,7 +2,7 @@
 
 
 #include "GAS/Abiliities/Combat/DamageNotifies/MeleeHit.h"
-#include "Characters/CombatComponents/BasicCombatComponent.h"
+#include "Characters/CombatComponents/CombatComponent.h"
 #include "Niagara/Public/NiagaraFunctionLibrary.h"
 
 
@@ -15,7 +15,7 @@ void UMeleeHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Anim
 	
 	if(const AActor* OwningActor = MeshComp->GetOwner())
 	{
-		if(UBasicCombatComponent* Component = Cast<UBasicCombatComponent>(OwningActor->GetComponentByClass(UBasicCombatComponent::StaticClass())))
+		if(UCombatComponent* Component = Cast<UCombatComponent>(OwningActor->GetComponentByClass(UCombatComponent::StaticClass())))
 		{
 			if(Component->PerformDamageTrace(BoneNameTraceLocation) && ConfirmHitVFX != nullptr)
 			{

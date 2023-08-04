@@ -44,13 +44,13 @@ class CRASH_API ACrashPlayerCharacter : public ACrashCharacter
 public:
 	// Sets default values for this character's properties
 	ACrashPlayerCharacter();
-
-	virtual void PostInitProperties() override;
 	void InitializePlayerCharacter();
 
 	UFUNCTION(BlueprintCallable, BlueprintGetter)
 	FAbilityInputMap& GetInputAbilityMap() { return InputAbilityMap; }
 
+	virtual void PossessedBy(AController* NewController) override;
+	
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Input")
 	TArray<FMappingContextData> DefaultInputMappings;
@@ -63,7 +63,8 @@ protected:
 
 	UPROPERTY()
 	UCrashEnhancedInputComponent* CrashEnhancedInputComponent;
-	
+
+	void GiveInputMapAbilitiesToCharacter();
 	void SetupCameraView() const;
 	
 	void Move(const FInputActionValue& Value);

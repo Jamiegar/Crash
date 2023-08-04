@@ -5,6 +5,7 @@
 #include "SlateOptMacros.h"
 #include "Menus/AbilityMapping/InputAbilityMappingWidget.h"
 #include "InputAction.h"
+#include "Characters/CrashPlayerCharacter.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -14,6 +15,8 @@ void SAbilityActionMap::Construct(const FArguments& InArgs)
 	OnInputSelectedAbility = InArgs._OnInputSelectedAbility;
 	SetInputActions(InArgs._AbilityType);
 	GetImagePaths();
+
+
 	
 	ChildSlot
 	[
@@ -21,11 +24,7 @@ void SAbilityActionMap::Construct(const FArguments& InArgs)
 		+SVerticalBox::Slot()
 		.AutoHeight().VAlign(VAlign_Center) .HAlign(HAlign_Center)
 		[
-			SNew(SInputAbilityMappingWidget)
-			.Action(IA_UP)
-			.InputImage(InputImage_Up)
-			.OnAbilitySelected(FSelectedAbility::CreateSP(this, &SAbilityActionMap::OnAbilitySelected))
-			
+			CreateInputAbilityMappingWidget(IA_UP, InputImage_Up)
 		]
 		+SVerticalBox::Slot()
 		.AutoHeight().VAlign(VAlign_Center) .HAlign(HAlign_Center)
@@ -34,41 +33,36 @@ void SAbilityActionMap::Construct(const FArguments& InArgs)
 			+SHorizontalBox::Slot()
 			.AutoWidth() .VAlign(VAlign_Center) .HAlign(HAlign_Center)
 			[
-				SNew(SInputAbilityMappingWidget)
-				.Action(IA_Left)
-				.InputImage(InputImage_Left)
-				.OnAbilitySelected(FSelectedAbility::CreateSP(this, &SAbilityActionMap::OnAbilitySelected))
-				
+				CreateInputAbilityMappingWidget(IA_Left, InputImage_Left)
 			]
 			+SHorizontalBox::Slot()
 			.AutoWidth() .VAlign(VAlign_Center) .HAlign(HAlign_Center)
 			[
-				SNew(SInputAbilityMappingWidget)
-				.Action(IA_Neutral)
-				.InputImage(InputImage_Neutral)
-				.OnAbilitySelected(FSelectedAbility::CreateSP(this, &SAbilityActionMap::OnAbilitySelected))
-				
+				CreateInputAbilityMappingWidget(IA_Neutral, InputImage_Neutral)
 			]
 			+SHorizontalBox::Slot()
 			.AutoWidth() .VAlign(VAlign_Center) .HAlign(HAlign_Center)
 			[
-				SNew(SInputAbilityMappingWidget)
-				.Action(IA_Right)
-				.InputImage(InputImage_Right)
-				.OnAbilitySelected(FSelectedAbility::CreateSP(this, &SAbilityActionMap::OnAbilitySelected))
-				
+				CreateInputAbilityMappingWidget(IA_Right, InputImage_Right)
 			]
 		]
 		+SVerticalBox::Slot()
 		.AutoHeight().VAlign(VAlign_Center) .HAlign(HAlign_Center)
 		[
-			SNew(SInputAbilityMappingWidget)
-			.Action(IA_Down)
-			.InputImage(InputImage_Down)
-			.OnAbilitySelected(FSelectedAbility::CreateSP(this, &SAbilityActionMap::OnAbilitySelected))
+			CreateInputAbilityMappingWidget(IA_Down, InputImage_Down)
 		]
 	];
+
 	
+	
+}
+
+void SAbilityActionMap::UpdateActionMap(ACrashPlayerCharacter* SelectedCharacter)
+{
+	for (auto AbilityAction : InputAbilityMappingWidgets)
+	{
+		AbilityAction.Get()->UpdateCharacterAbilityMap(SelectedCharacter->GetInputAbilityMap());
+	}
 }
 
 void SAbilityActionMap::GetImagePaths()
@@ -112,6 +106,17 @@ UInputAction* SAbilityActionMap::LoadInputAction(const FString& InputActionRefer
 	
 	UE_LOG(LogTemp, Error, TEXT("Could not load input action at: %s"), *InputActionReferencePath);
 	return nullptr;
+}
+
+TSharedRef<SInputAbilityMappingWidget> SAbilityActionMap::CreateInputAbilityMappingWidget(UInputAction* Action, FName ImagePath)
+{
+	TSharedPtr<SInputAbilityMappingWidget> MappingWidget = SNew(SInputAbilityMappingWidget)
+	.Action(Action) 
+	.InputImage(ImagePath)
+	.OnAbilitySelected(FSelectedAbility::CreateSP(this, &SAbilityActionMap::OnAbilitySelected));
+
+	InputAbilityMappingWidgets.Add(MappingWidget);
+	return MappingWidget.ToSharedRef();
 }
 
 void SAbilityActionMap::OnAbilitySelected(UCrashGameplayAbility* SelectedAbility, UInputAction* WidgetAction) const
