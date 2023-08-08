@@ -69,10 +69,11 @@ void UComboAttack::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 
 	if(ComboCount == ComboMontages.Num()-1)
 	{
-		ApplyKnockbackToTarget(Payload);
+		WaitForHitStopEndAndApplyKnockback(Payload);
 	}
 	else
 	{
+		ApplyHitStopInstant(Payload);
 		ApplyStunToTarget(Payload);
 	}
 }

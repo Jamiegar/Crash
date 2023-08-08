@@ -57,5 +57,5 @@ void UAirAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload
 {
 	Super::OnGameplayReceivedDamageEvent(Payload);
 
-	ApplyKnockbackToTarget(Payload);
+	ApplyKnockbackInstantToTarget(Payload);
 }

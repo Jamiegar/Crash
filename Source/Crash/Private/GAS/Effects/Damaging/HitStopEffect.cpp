@@ -2,19 +2,19 @@
 
 
 #include "GAS/Effects/Damaging/HitStopEffect.h"
-#include "GameplayTagsManager.h"
+#include "GAS/Abiliities/Combat/Damage/HitStopAbility.h"
 
 UHitStopEffect::UHitStopEffect()
 {
-	DurationPolicy = EGameplayEffectDurationType::HasDuration;
-	DurationMagnitude = FGameplayEffectModifierMagnitude(0.5);
-
-	FGameplayEffectCue HitStopCue;
-	FGameplayTagContainer HitStopTagContainer;
-	TArray<FString> Tags;
-	Tags.Add("GameplayCue.HitStop");
+	InheritableGameplayEffectTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Damaged.HitStop"));
+	InheritableOwnedTagsContainer.AddTag(FGameplayTag::RequestGameplayTag("Player.Damaged.HitStop"));
 	
-	UGameplayTagsManager::Get().RequestGameplayTagContainer(Tags, HitStopTagContainer);
-	HitStopCue.GameplayCueTags = HitStopTagContainer;
-	GameplayCues.Add(HitStopCue);
+	DurationPolicy = EGameplayEffectDurationType::HasDuration;
+	DurationMagnitude = FGameplayEffectModifierMagnitude(0.5f);
+	
+	FGameplayAbilitySpecDef HitStopAbilitySpecDef;
+	HitStopAbilitySpecDef.Ability = UHitStopAbility::StaticClass();
+	HitStopAbilitySpecDef.RemovalPolicy = EGameplayEffectGrantedAbilityRemovePolicy::CancelAbilityImmediately;
+
+	GrantedAbilities.Add(HitStopAbilitySpecDef);
 }

@@ -59,6 +59,9 @@ void SAbilityActionMap::Construct(const FArguments& InArgs)
 
 void SAbilityActionMap::UpdateActionMap(ACrashPlayerCharacter* SelectedCharacter)
 {
+	if(!SelectedCharacter)
+		return;
+	
 	for (auto AbilityAction : InputAbilityMappingWidgets)
 	{
 		AbilityAction.Get()->UpdateCharacterAbilityMap(SelectedCharacter->GetInputAbilityMap());
@@ -89,6 +92,11 @@ void SAbilityActionMap::SetInputActions(EActionAbilityType Type)
 			IA_Neutral = LoadInputAction("/Game/Blueprints/Characters/Input/CombatInputActions/IA_BasicAttack.IA_BasicAttack");
 			break;
 		case EActionAbilityType::Special:
+			IA_Left = LoadInputAction("/Game/Blueprints/Characters/Input/CombatInputActions/IA_SpecialLeftAttack.IA_SpecialLeftAttack");
+			IA_Right = LoadInputAction("/Game/Blueprints/Characters/Input/CombatInputActions/IA_SpecialRightAttack.IA_SpecialRightAttack");
+			IA_Down = LoadInputAction("/Game/Blueprints/Characters/Input/CombatInputActions/IA_SpecialDownAttack.IA_SpecialDownAttack");
+			IA_UP = LoadInputAction("/Game/Blueprints/Characters/Input/CombatInputActions/IA_SpecialUpAttack.IA_SpecialUpAttack");
+			IA_Neutral = LoadInputAction("/Game/Blueprints/Characters/Input/CombatInputActions/IA_SpecialAttack.IA_SpecialAttack");
 			break;
 	}
 	

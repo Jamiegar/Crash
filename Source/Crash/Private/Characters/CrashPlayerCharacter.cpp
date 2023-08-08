@@ -29,6 +29,7 @@ void FAbilityInputMap::LoadDefaults()
 	UInputAction* BlockInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_Block.IA_Block"));
 	UInputAction* SlideInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_Slide.IA_Slide"));
 	UInputAction* JumpInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/MovementInput/IA_Jump.IA_Jump"));
+	
 
 	// --- Find Default Abilities ------------------------------------
 
@@ -121,18 +122,23 @@ void ACrashPlayerCharacter::GiveInputMapAbilitiesToCharacter()
 	}
 }
 
-void ACrashPlayerCharacter::SetupCameraView() const
+void ACrashPlayerCharacter::SetupCameraView()
 {
 	if(UCameraSubsystem* CameraSubsystem = GetWorld()->GetSubsystem<UCameraSubsystem>())
+	{
 		CameraSubsystem->RegisterPlayerToCamera(this);
+		ConstantCharacterForward = UKismetMathLibrary::GetRightVector(CameraSubsystem->GetCamera()->GetActorRotation());
+	}
+	
 }
 
 void ACrashPlayerCharacter::Move(const FInputActionValue& Value)
 {
+	if(!bCanMove)
+		return;
+	
 	const float AxisValue = Value.Get<float>();
-
-	const FVector ForwardDirection = UKismetMathLibrary::GetForwardVector(FRotator(0, GetControlRotation().Yaw, 0));
-	AddMovementInput(ForwardDirection, AxisValue, true);
+	AddMovementInput(ConstantCharacterForward, AxisValue, true);
 }
 
 void ACrashPlayerCharacter::OnAbilityInputPressed(const FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const UInputAction* SourceAction)

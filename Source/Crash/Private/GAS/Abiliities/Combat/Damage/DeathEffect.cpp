@@ -2,20 +2,16 @@
 
 
 #include "GAS/Abiliities/Combat/Damage/DeathEffect.h"
-
 #include "GameplayTagsManager.h"
 
 UDeathEffect::UDeathEffect()
 {
-	DurationPolicy = EGameplayEffectDurationType::HasDuration;
+	DurationPolicy = EGameplayEffectDurationType::Infinite;
 
 	InheritableOwnedTagsContainer.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Dead"));
 	InheritableBlockedAbilityTagsContainer.AddTag(FGameplayTag::RequestGameplayTag("Player.Damaged.Knockback"));
 	InheritableBlockedAbilityTagsContainer.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Invincible"));
 	
-	const FGameplayEffectModifierMagnitude ModifierMagnitude = FGameplayEffectModifierMagnitude(1.2);
-	DurationMagnitude = ModifierMagnitude;
-
 	FGameplayEffectCue DeathCue;
 	FGameplayTagContainer DeathTagContainer;
 	TArray<FString> Tags;

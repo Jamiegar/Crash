@@ -20,5 +20,9 @@ void UCrashAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 		UE_LOG(LogTemp, Warning, TEXT("New Percentage: %f"), GetPercentage());
 		SetDamage(0.0f); //Damage attribute is set to 0 after it has been used 
 	}
+	else if(Data.EvaluatedData.Attribute == GetLivesAttribute())
+	{
+		SetPercentage(0.0f);
+	}
 }
 

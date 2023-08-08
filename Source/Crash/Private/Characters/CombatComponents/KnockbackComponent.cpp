@@ -4,6 +4,7 @@
 #include "Characters/CombatComponents/KnockbackComponent.h"
 #include "Characters/CrashCharacter.h"
 #include "Components/TimelineComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
 
@@ -56,13 +57,15 @@ void UKnockbackComponent::StartFaceVelocityDirection()
 	
 	TimerManager.SetTimer(FaceVectorDirectionTimerHandle, this, 
 		&UKnockbackComponent::FaceVelocityDirection, 0.01f, true);
-	
+
+	OwnerCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
 void UKnockbackComponent::StopFaceVelocity()
 {
 	GetWorld()->GetTimerManager().ClearTimer(FaceVectorDirectionTimerHandle);
 	OwnerCharacter->GetMeshAttachmentPoint()->SetRelativeRotation(FRotator());
+	OwnerCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 void UKnockbackComponent::FaceVelocityDirection() const
@@ -74,7 +77,7 @@ void UKnockbackComponent::FaceVelocityDirection() const
 	const FRotator TargetRotation = UKismetMathLibrary::MakeRotFromX(VelocityDir);
 	
 	const FRotator NewRotation = UKismetMathLibrary::RInterpTo(Current, TargetRotation, GetWorld()->DeltaTimeSeconds, 50);
-	OwnerCharacter->GetMeshAttachmentPoint()->SetRelativeRotation(NewRotation);
+	OwnerCharacter->GetMeshAttachmentPoint()->SetRelativeRotation(FRotator(NewRotation.Pitch, 0, NewRotation.Roll));
 }
 
 void UKnockbackComponent::BeginPlay()

@@ -57,4 +57,7 @@ private:
 	UFUNCTION()
 	void OnKnockbackGroundedFinished();
 
+	UFUNCTION()
+	void GetupMontageFinished(UAnimMontage* Montage, bool bInterrupted);
+
 };

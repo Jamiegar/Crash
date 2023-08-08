@@ -43,6 +43,7 @@ void SCharacterToolWidget::Construct(const FArguments& InArgs)
 				.AutoHeight() .VAlign(VAlign_Center) .HAlign(HAlign_Center)
 				[
 					SAssignNew(BasicAbilityInputMap, SAbilityActionMap)
+					.AbilityType(EActionAbilityType::Basic)
 					.OnInputSelectedAbility(FInputActionSelectedAbility::CreateSP(this, &SCharacterToolWidget::OnInputAbilitySelected))
 				]
 				
@@ -61,6 +62,7 @@ void SCharacterToolWidget::Construct(const FArguments& InArgs)
 				.AutoHeight() .VAlign(VAlign_Center) .HAlign(HAlign_Center)
 				[
 					SAssignNew(SpecialAbilityInputMap, SAbilityActionMap)
+					.AbilityType(EActionAbilityType::Special)
 					.OnInputSelectedAbility(FInputActionSelectedAbility::CreateSP(this, &SCharacterToolWidget::OnInputAbilitySelected))
 				]
 			]
@@ -73,7 +75,7 @@ void SCharacterToolWidget::OnCharacterSelected(ACrashPlayerCharacter* SelectedCh
 {
 	CharacterSelected = SelectedCharacter;
 	BasicAbilityInputMap.Get()->UpdateActionMap(CharacterSelected);
-	//SpecialAbilityInputMap.Get()->UpdateActionMap(SelectedCharacter);
+	SpecialAbilityInputMap.Get()->UpdateActionMap(CharacterSelected);
 }
 
 void SCharacterToolWidget::OnInputAbilitySelected(UCrashGameplayAbility* SelectedAbility, UInputAction* Action)
@@ -95,6 +97,7 @@ void SCharacterToolWidget::OnInputAbilitySelected(UCrashGameplayAbility* Selecte
 	CharacterAbilityMap.AbilityInputMappingLayout.Add(Action, SelectedAbility->GetClass());
 
 	BasicAbilityInputMap.Get()->UpdateActionMap(CharacterSelected);
+	SpecialAbilityInputMap.Get()->UpdateActionMap(CharacterSelected);
 	
 }
 

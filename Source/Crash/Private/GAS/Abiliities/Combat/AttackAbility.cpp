@@ -9,9 +9,21 @@
 #include "Crash/Public/GAS/Abiliities/Combat/Damage/Data/StunAbilityData.h"
 #include "GAS/Effects/KnockbackCalculationEffect.h"
 #include "AbilitySystemComponent.h"
+#include "Abilities/Tasks/AbilityTask_WaitGameplayTag.h"
+#include "Characters/CrashCharacter.h"
 #include "GAS/Abiliities/Combat/Damage/StunAbility.h"
 #include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
 #include "GAS/Effects/Damaging/HitStopEffect.h"
+
+UAttackAbility::UAttackAbility()
+{
+	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
+	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
+
+	CancelAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo"));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
+}
 
 void UAttackAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -33,15 +45,10 @@ void UAttackAbility::WaitForDamageEffect()
 
 void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
-	/*const FGameplayEffectSpecHandle HitStopHandle = MakeEffectSpecHandleFromAbility(UHitStopEffect::StaticClass());
+	PayLoadEventData = Payload;
 
-	if(!HitStopHandle.IsValid())
-		return;
-	
-	FGameplayEffectSpec* HitStopSpec = HitStopHandle.Data.Get();
-	ApplyAbilityTagsToGameplayEffectSpec(*HitStopHandle.Data.Get(), GetCurrentAbilitySpec()); 
-	ApplyGameplayEffectSpecToTargetFromAbility(HitStopHandle, Payload.TargetData);
-	auto ActiveOwnerEffects = ApplyGameplayEffectSpecToOwnerFromAbility(HitStopHandle);*/ 
+	if(ACrashCharacter* TargetCharacter = Cast<ACrashCharacter>(Payload.Target))
+		TargetCharacter->FaceActor(GetActorInfo().OwnerActor.Get());\
 	
 	const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
 	const FGameplayEffectSpecHandle Handle = MakeEffectSpecHandleFromAbility(UDamageBasicInstant::StaticClass());
@@ -53,10 +60,13 @@ void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 	Spec->SetSetByCallerMagnitude(GameTags.PlayerDamaged, AbilityDamage); //Sends the Ability damage to the custom damage execute calculation 
 	ApplyAbilityTagsToGameplayEffectSpec(*Handle.Data.Get(), GetCurrentAbilitySpec()); 
 	ApplyGameplayEffectSpecToTargetFromAbility(Handle, Payload.TargetData);
+	
 }
 
-void UAttackAbility::ApplyKnockbackToTarget(FGameplayEventData Payload)
+void UAttackAbility::ApplyKnockbackInstantToTarget(FGameplayEventData Payload)
 {
+	PayLoadEventData = Payload;
+	
 	const FGameplayEffectSpecHandle Handle = MakeEffectSpecHandleFromAbility(UKnockbackCalculationEffect::StaticClass());
 	
 	FGameplayEffectSpec* Spec = Handle.Data.Get();
@@ -77,8 +87,15 @@ void UAttackAbility::ApplyKnockbackToTarget(FGameplayEventData Payload)
 	TargetComponent->HandleGameplayEvent(FGameplayTag::RequestGameplayTag("Event.Data.Knockback"), &EventKnockbackData);
 }
 
+void UAttackAbility::ApplyKnockbackInstantToTarget()
+{
+	ApplyKnockbackInstantToTarget(PayLoadEventData);
+}
+
 void UAttackAbility::ApplyStunToTarget(FGameplayEventData Payload)
 {
+	PayLoadEventData = Payload;
+	
 	UAbilitySystemComponent* TargetComponent = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Payload.Target);
 
 	FGameplayAbilitySpec StunSpec = FGameplayAbilitySpec(UStunAbility::StaticClass());
@@ -94,4 +111,40 @@ void UAttackAbility::ApplyStunToTarget(FGameplayEventData Payload)
 		const FGameplayTag StunEventTag = FGameplayTag::RequestGameplayTag("Event.Data.Stun");
 		TargetComponent->HandleGameplayEvent(StunEventTag, &StunPayloadData);
 	}
+}
+
+void UAttackAbility::ApplyHitStopInstant(FGameplayEventData Payload) 
+{
+	PayLoadEventData = Payload;
+	
+	const FGameplayEffectSpecHandle HitStopHandle = MakeEffectSpecHandleFromAbility(UHitStopEffect::StaticClass());
+	const float HitStopDuration = AbilityDamage / 20; 
+	HitStopHandle.Data.Get()->SetDuration(HitStopDuration, true);
+	
+	if(!HitStopHandle.IsValid())
+		return;
+
+	
+	
+	ApplyAbilityTagsToGameplayEffectSpec(*HitStopHandle.Data.Get(), GetCurrentAbilitySpec());
+
+	ApplyGameplayEffectSpecToTargetFromAbility(HitStopHandle, Payload.TargetData);
+	auto ActiveGameplayEffectHandles = ApplyGameplayEffectSpecToOwnerFromAbility(HitStopHandle);
+}
+
+void UAttackAbility::WaitForHitStopEndAndApplyKnockback(FGameplayEventData Payload)
+{
+	PayLoadEventData = Payload;
+	
+	ApplyHitStopInstant(Payload);
+
+	FGameplayTag HitStopTag = FGameplayTag::RequestGameplayTag("Player.Damaged.HitStop");
+	AsyncHitStopTagRemoved = UAbilityTask_WaitGameplayTagRemoved::WaitGameplayTagRemove(this, HitStopTag, nullptr, true);
+	AsyncHitStopTagRemoved->Removed.AddUniqueDynamic(this, &UAttackAbility::OnHitStopTagRemoved);
+	AsyncHitStopTagRemoved->Activate();
+}
+
+void UAttackAbility::OnHitStopTagRemoved()
+{
+	ApplyKnockbackInstantToTarget();
 }

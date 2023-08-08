@@ -15,6 +15,7 @@ UJumpAbility::UJumpAbility()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.MovementAction.JumpExhausted"));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Cooldown.Jump"));
 }
 
 

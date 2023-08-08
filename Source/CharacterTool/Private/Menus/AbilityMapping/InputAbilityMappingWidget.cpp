@@ -65,8 +65,8 @@ TSharedRef<SWidget> SInputAbilityMappingWidget::OnMappingButtonClicked()
 
 void SInputAbilityMappingWidget::UpdateCharacterAbilityMap(FAbilityInputMap& AbilityInputMap)
 {
-	TSubclassOf<UCrashGameplayAbility>* Ability = AbilityInputMap.AbilityInputMappingLayout.Find(WidgetInputActionType);
-	CurrentAbilityTextBlock.Get()->SetText(FText::FromString(Ability->Get()->GetName()));
+	if(const TSubclassOf<UCrashGameplayAbility>* Ability = AbilityInputMap.AbilityInputMappingLayout.Find(WidgetInputActionType))	
+		CurrentAbilityTextBlock.Get()->SetText(FText::FromString(Ability->Get()->GetName()));
 }
 
 void SInputAbilityMappingWidget::OnClassPicked(UClass* SelectedAbility)

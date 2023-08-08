@@ -8,6 +8,7 @@
 #include "Characters/CrashCharacter.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Characters/CombatComponents/KnockbackComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/CrashAttributeSet.h"
 #include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
 
@@ -29,7 +30,7 @@ void UKnockBackAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if(!CommitAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo()))
+	if(!CommitCrashAbility())
 		CancelAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), false);
 	
 
@@ -96,6 +97,8 @@ void UKnockBackAbility::OnCharacterGrounded(FGameplayEventData Payload)
 	WaitAsyncKncokbackEnd = UAbilityTask_WaitDelay::WaitDelay(this, KnockbackData->KnockbackGroundedDuration);
 	WaitAsyncKncokbackEnd->OnFinish.AddUniqueDynamic(this, &UKnockBackAbility::OnKnockbackGroundedFinished);
 	WaitAsyncKncokbackEnd->Activate();
+
+	TargetCharacter->bCanMove = false;
 }
 
 void UKnockBackAbility::OnKnockbackGroundedFinished()
@@ -105,10 +108,19 @@ void UKnockBackAbility::OnKnockbackGroundedFinished()
 		UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance();
 
 		AnimInstance->Montage_Play(GetUpMontage, 1);
+
+		FOnMontageEnded Delegate;
+		Delegate.BindUObject(this, &UKnockBackAbility::GetupMontageFinished);
+		AnimInstance->Montage_SetEndDelegate(Delegate);
 	}
 	
 	TargetCharacter->GetKnockbackComponent()->StopFaceVelocity();
-	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfoRef(), true, false);
+}
+
+void UKnockBackAbility::GetupMontageFinished(UAnimMontage* Montage, bool bInterrupted)
+{
+	TargetCharacter->bCanMove = true;
+	EndCrashAbility();
 
 	FGameplayTagContainer KnockbackTagContainer;
 	TArray<FString> Tags;

@@ -19,14 +19,7 @@ void UBasicAttack::PostInitProperties()
 {
 	Super::PostInitProperties();
 	
-	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
-	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
-
-	CancelAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo"));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.State.Airborne")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.Attack")));
-	
 }
 
 void UBasicAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -39,17 +32,9 @@ void UBasicAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	if(!CommitAbility(Handle, ActorInfo, ActivationInfo))
 		return;
-	
-	if(const USkeletalMeshComponent* SkeletalMesh = ActorInfo->SkeletalMeshComponent.Get())
-	{
-		UAnimInstance* AnimInstance = SkeletalMesh->GetAnimInstance();
 
-		AnimInstance->Montage_Play(AttackMontage, 1);
-		
-		FOnMontageEnded Delegate;
-		Delegate.BindUObject(this, &UBasicAttack::OnMontageFinished);
-		AnimInstance->Montage_SetEndDelegate(Delegate);
-	}
+	FOnMontageEnded Delegate = FOnMontageEnded::CreateUObject(this, &UBasicAttack::OnMontageFinished);
+	PlayAnimationMontageToOwningActor(AttackMontage, Delegate);
 
 	WaitForDamageEffect(); //Async task is created and calls OnGameplayReceivedDamageEvent when event is received
 }
@@ -70,7 +55,8 @@ void UBasicAttack::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted)
 
 void UBasicAttack::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
+	
 	Super::OnGameplayReceivedDamageEvent(Payload);
-	ApplyKnockbackToTarget(Payload);
+	WaitForHitStopEndAndApplyKnockback(Payload);
 }
 

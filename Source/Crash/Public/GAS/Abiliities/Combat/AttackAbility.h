@@ -6,6 +6,7 @@
 #include "GAS/Abiliities/CrashGameplayAbility.h"
 #include "AttackAbility.generated.h"
 
+class UAbilityTask_WaitGameplayTagRemoved;
 class UKnockbackData;
 class UStunAbilityData;
 class UAbilityTask_WaitGameplayEvent;
@@ -16,16 +17,18 @@ class CRASH_API UAttackAbility : public UCrashGameplayAbility
 	GENERATED_BODY()
 
 public:
+	UAttackAbility();
+	
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
 		bool bReplicateEndAbility, bool bWasCancelled) override;
 
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
-	float AbilityDamage = 1.f;
+	float AbilityDamage = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
-	float KnockbackScaling = 0;
+	float KnockbackScaling = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
 	bool bAttackShouldStun = false;
@@ -35,9 +38,15 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Knockback")
 	UKnockbackData* KnockbackData;
+
+	UPROPERTY()
+	FGameplayEventData PayLoadEventData;
 	
 	UPROPERTY()
 	UAbilityTask_WaitGameplayEvent* AsyncDamageTask;
+
+	UPROPERTY()
+	UAbilityTask_WaitGameplayTagRemoved* AsyncHitStopTagRemoved;
 	
 	UFUNCTION()
 	void WaitForDamageEffect();
@@ -46,8 +55,18 @@ protected:
 	virtual void OnGameplayReceivedDamageEvent(FGameplayEventData Payload);
 
 	UFUNCTION()
-	void ApplyKnockbackToTarget(FGameplayEventData Payload);
+	void ApplyKnockbackInstantToTarget(FGameplayEventData Payload);
+	void ApplyKnockbackInstantToTarget();
 
 	UFUNCTION()
 	void ApplyStunToTarget(FGameplayEventData Payload);
+
+	UFUNCTION()
+	void ApplyHitStopInstant(FGameplayEventData Payload);
+	
+	UFUNCTION()
+	void WaitForHitStopEndAndApplyKnockback(FGameplayEventData Payload);
+
+	UFUNCTION()
+	virtual void OnHitStopTagRemoved();
 };

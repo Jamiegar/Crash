@@ -2,6 +2,8 @@
 
 
 #include "Characters/CrashCharacter.h"
+
+#include "GameplayTagsManager.h"
 #include "Characters/CombatComponents/CombatComponent.h"
 #include "Characters/CombatComponents/KnockbackComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -16,6 +18,8 @@
 #include "GAS/Abiliities/Combat/AirAttackAbility.h"
 #include "GAS/Abiliities/Combat/Damage/DeathEffect.h"
 #include "GAS/Abiliities/Combat/Damage/RespawnAbility.h"
+#include "GAS/Effects/Damaging/DamageLivesInstant.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -216,6 +220,12 @@ void ACrashCharacter::ApplyEffectToCrashCharacter(TSubclassOf<UGameplayEffect> E
 		FActiveGameplayEffectHandle GEHandle = AbilityComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 }
 
+void ACrashCharacter::FaceActor(const AActor* TargetActor)
+{
+	const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetActor->GetActorLocation());
+	SetActorRotation(FRotator(0, LookAtRotation.Yaw, 0));
+}
+
 void ACrashCharacter::KillCharacter()
 {
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
@@ -226,11 +236,30 @@ void ACrashCharacter::KillCharacter()
 	bIsFallingDown = false;
 	
 	ApplyEffectToCrashCharacter(UDeathEffect::StaticClass());
+	ApplyEffectToCrashCharacter(UDamageLivesInstant::StaticClass());
+
+	if(GetCrashAttributeSet()->GetLives() <= 0)
+	{
+		OnCharacterKnockedOut.Broadcast();
+		UE_LOG(LogTemp, Warning, TEXT("Character KO"));
+		return;
+	}
 
 	FGameplayAbilitySpec RespawnAbility = FGameplayAbilitySpec(URespawnAbility::StaticClass());
 	GetAbilitySystemComponent()->GiveAbilityAndActivateOnce(RespawnAbility);
+
+	GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ACrashCharacter::OnRespawnTimerFinished, RespawnDelay);
 	
 	OnCharacterDeath.Broadcast();
 }
 
+void ACrashCharacter::OnRespawnTimerFinished() //When respawn delay has finished the character will respawn
+{
+	FGameplayTagContainer DeathTagContainer;
+	TArray<FString> DeathTags;
+	DeathTags.Add("Player.State.Dead");
+	
+	UGameplayTagsManager::Get().RequestGameplayTagContainer(DeathTags, DeathTagContainer);
+	AbilityComponent->RemoveActiveEffectsWithGrantedTags(DeathTagContainer);
+}
 

@@ -8,6 +8,7 @@
 #include "AbilitySystemInterface.h"
 #include "GAS/CrashAbilitySystemComponent.h"
 #include "GAS/CrashAttributeSet.h"
+#include "Interfaces/CombatAbilities.h"
 #include "CrashCharacter.generated.h"
 
 class UTimelineComponent;
@@ -15,42 +16,33 @@ class UKnockbackComponent;
 class UCombatComponent;
 class UCrashGameplayAbility;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCharacterKnockOut);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnKillCharacter);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFallingDown);
 
 UCLASS(Abstract)
-class CRASH_API ACrashCharacter : public ACharacter, public IAbilitySystemInterface
+class CRASH_API ACrashCharacter : public ACharacter, public IAbilitySystemInterface, public ICombatAbilities
 {
+
+private:
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
-	ACrashCharacter();
-	void SetDefaultMesh() const;
-	void AddDefaultAbilities();
-	
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilityComponent; };
-	UCrashAttributeSet* GetCrashAttributeSet() const;
-	UCombatComponent* GetBasicCombatComponent() const { return  CombatComponent; }
-	UKnockbackComponent* GetKnockbackComponent() const { return KnockbackComponent; }
-	UTimelineComponent* GetTimelineComponent() const { return TimelineComponent; }
-	USceneComponent* GetMeshAttachmentPoint() const {return  MeshAttachment; }
-
-	virtual void PossessedBy(AController* NewController) override;
-	virtual void InitializeAttributes();
-	virtual void GiveDefaultAbilities();
-	
-	void ApplyEffectToCrashCharacter(TSubclassOf<UGameplayEffect> Effect) const;
-
 	UPROPERTY(BlueprintAssignable)
 	FOnKillCharacter OnCharacterDeath;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFallingDown OnCharacterFallingDown;
+
+	UPROPERTY(BlueprintAssignable)
+	FCharacterKnockOut OnCharacterKnockedOut;
 		
 	UFUNCTION(BlueprintCallable, Category="Kill")
 	void KillCharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanMove = true;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsKnockedBack = false;
 
@@ -65,9 +57,15 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsFallingDown = false;
-	
+
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Respawning")
+	float RespawnDelay = 1.2;
+
+	UPROPERTY()
+	FTimerHandle RespawnTimerHandle;
+	
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Abilities")
 	TSubclassOf<class UGameplayEffect> DefaultAttributeEffect;
 
@@ -92,14 +90,44 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="Movement")
 	FTimerHandle FallingDownTimerHandle;
 
+private:
+	UPROPERTY(EditDefaultsOnly)
+	UCrashAttributeSet* CrashAttributes;
+	
+public:
+	// Sets default values for this character's properties
+	ACrashCharacter();
+	void SetDefaultMesh() const;
+	void AddDefaultAbilities();
+	
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilityComponent; };
+	UCrashAttributeSet* GetCrashAttributeSet() const;
+	
+	UKnockbackComponent* GetKnockbackComponent() const { return KnockbackComponent; }
+	UTimelineComponent* GetTimelineComponent() const { return TimelineComponent; }
+	USceneComponent* GetMeshAttachmentPoint() const {return  MeshAttachment; }
+
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void InitializeAttributes();
+	virtual void GiveDefaultAbilities();
+	
+	void ApplyEffectToCrashCharacter(TSubclassOf<UGameplayEffect> Effect) const;
+
+	UFUNCTION(BlueprintCallable)
+	void FaceActor(const AActor* TargetActor);
+	
+	//////////////////////////////////////////////////////////////////////////
+	// ICombatInterface
+	//////////////////////////////////////////////////////////////////////////
+	UFUNCTION(BlueprintCallable)
+	virtual UCombatComponent* GetCombatComponent() override { return CombatComponent; }
+
+protected:
 	UFUNCTION(Category="Movement")
 	void CheckFallingDown();
 	
-	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetCharacterSpeed() { return GetVelocity().Length(); }
-	
-	
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -109,11 +137,9 @@ protected:
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void SetUpDefaultMovementValues();
 
-private:
-	UPROPERTY(EditDefaultsOnly)
-	UCrashAttributeSet* CrashAttributes;
-	
-	
+	UFUNCTION()
+	virtual void OnRespawnTimerFinished();
+
 };
 
 

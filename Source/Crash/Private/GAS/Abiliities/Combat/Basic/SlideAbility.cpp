@@ -66,5 +66,5 @@ void USlideAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 	FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(UBrokenShieldAbility::StaticClass());
 	TargetComponent->GiveAbilityAndActivateOnce(AbilitySpec);
 	
-	ApplyKnockbackToTarget(Payload);
+	ApplyKnockbackInstantToTarget(Payload);
 }

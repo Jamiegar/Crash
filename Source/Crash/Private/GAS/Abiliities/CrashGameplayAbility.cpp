@@ -38,6 +38,25 @@ void UCrashGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* Actor
 	
 }
 
+void UCrashGameplayAbility::PlayAnimationMontageToOwningActor(UAnimMontage* Montage, FOnMontageEnded& MontageEndDelegate)
+{
+	if(const USkeletalMeshComponent* SkeletalMesh = GetActorInfo().SkeletalMeshComponent.Get())
+	{
+		UAnimInstance* AnimInstance = SkeletalMesh->GetAnimInstance();
+		AnimInstance->Montage_Play(Montage, 1);
+		AnimInstance->Montage_SetEndDelegate(MontageEndDelegate);
+	}
+}
+
+void UCrashGameplayAbility::PlayAnimationMontageToOwningActor(UAnimMontage* Montage)
+{
+	if(const USkeletalMeshComponent* SkeletalMesh = GetActorInfo().SkeletalMeshComponent.Get())
+	{
+		UAnimInstance* AnimInstance = SkeletalMesh->GetAnimInstance();
+		AnimInstance->Montage_Play(Montage, 1);
+	}
+}
+
 FGameplayEffectSpecHandle UCrashGameplayAbility::MakeEffectSpecHandleFromAbility(const TSubclassOf<UGameplayEffect> EffectClass) const
 {
 	const FGameplayEffectSpecHandle Handle =

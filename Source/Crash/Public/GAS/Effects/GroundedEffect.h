@@ -13,6 +13,8 @@ UCLASS()
 class CRASH_API UGroundedEffect : public UGameplayEffect
 {
 	GENERATED_BODY()
+
+public:
 	UGroundedEffect();
 	
 };

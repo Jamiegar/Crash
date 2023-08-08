@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
 #include "Characters/Input/AbilitySystemInputID.h"
+#include "Animation/AnimMontage.h"
 #include "CrashGameplayAbility.generated.h"
 
 
@@ -42,6 +43,9 @@ protected:
 	void EndCrashAbility();
 
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+
+	void PlayAnimationMontageToOwningActor(UAnimMontage* Montage, FOnMontageEnded& MontageEndDelegate);
+	void PlayAnimationMontageToOwningActor(UAnimMontage* Montage);
 
 	FGameplayEffectSpecHandle MakeEffectSpecHandleFromAbility(const TSubclassOf<UGameplayEffect> EffectClass) const;
 	TArray<FActiveGameplayEffectHandle> ApplyGameplayEffectSpecToTargetFromAbility(FGameplayEffectSpecHandle SpecHandle, FGameplayAbilityTargetDataHandle& TargetData) const;

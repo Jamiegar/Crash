@@ -50,6 +50,7 @@ public:
 	FAbilityInputMap& GetInputAbilityMap() { return InputAbilityMap; }
 
 	virtual void PossessedBy(AController* NewController) override;
+
 	
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Input")
@@ -65,7 +66,7 @@ protected:
 	UCrashEnhancedInputComponent* CrashEnhancedInputComponent;
 
 	void GiveInputMapAbilitiesToCharacter();
-	void SetupCameraView() const;
+	void SetupCameraView();
 	
 	void Move(const FInputActionValue& Value);
 	
@@ -82,5 +83,9 @@ public:
 	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
+private:
+
+	UPROPERTY()
+	FVector ConstantCharacterForward = FVector();
 };

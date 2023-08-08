@@ -3,11 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayEffectTypes.h"
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
-class UNiagaraComponent;
 class UCapsuleComponent;
+class UNiagaraComponent;
 class UProjectileMovementComponent;
 
 UCLASS(Blueprintable)
@@ -15,26 +16,37 @@ class CRASH_API AProjectile : public AActor
 {
 	GENERATED_BODY()
 
-public:
-	// Sets default values for this actor's properties
-	AProjectile();
-
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Projectile")
 	UCapsuleComponent* CollisionComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Projectile")
+	UStaticMeshComponent* ProjectileMesh;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Projectile")
 	UNiagaraComponent* NiagaraComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Projectile")
 	UProjectileMovementComponent* ProjectileComponent;
+
+	UPROPERTY()
+	FGameplayEffectSpecHandle ProjectileHitEffectHandle; 
 	
-	void SetDefaultProjectileMovementValues();
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	
+public:
+	// Sets default values for this actor's properties
+	AProjectile();
+
+	UFUNCTION(BlueprintCallable, Category="Damaging")
+	void SetDamagingEffectHandle(const FGameplayEffectSpecHandle DamagingSpecHandle) { ProjectileHitEffectHandle = DamagingSpecHandle; }
 	
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+protected:
+	void SetDefaultProjectileMovementValues();
+
+	UFUNCTION()
+	void OnCollisionComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	virtual FGameplayEffectSpecHandle CreateDefaultEffect(UAbilitySystemComponent* AbilityComponent);
+	
 };

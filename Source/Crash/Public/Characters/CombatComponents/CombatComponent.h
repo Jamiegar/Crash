@@ -8,6 +8,7 @@
 #include "CombatComponent.generated.h"
 
 
+class AHitBox;
 struct FGameplayEventData;
 class UCrashGameplayAbility;
 class UAbilitySystemComponent;
@@ -27,9 +28,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Crash Character Owner")
 	UAbilitySystemComponent* GetOwnersAbilitySystemComponent() const;
 
-	UFUNCTION(BlueprintCallable, Category="Abilities|Combat")
+	UFUNCTION(BlueprintCallable, Category="Combat")
 	bool PerformDamageTrace(FName BoneNameLocation);
-	
+
+	UFUNCTION(BlueprintCallable, Category="Combat")
+	AHitBox* SpawnHitBox(FVector Location, FRotator Rotation);
+
+private:
+	UFUNCTION()
+	void OnHitBoxOverlapWithActor(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 };
 
 

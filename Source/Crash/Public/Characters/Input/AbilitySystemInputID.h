@@ -11,5 +11,9 @@ enum class EAbilityInputID
 	BasicAttackDown,
 	BasicAttack,
 	Block,
-	Slide
+	Slide,
+	SpecialAttackMiddle,
+	SpecialAttackUp,
+	SpecialAttackDown,
+	SpecialAttack
 };
