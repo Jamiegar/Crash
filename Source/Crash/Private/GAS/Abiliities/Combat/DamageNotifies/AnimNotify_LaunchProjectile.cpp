@@ -4,7 +4,9 @@
 #include "GAS/Abiliities/Combat/DamageNotifies/AnimNotify_LaunchProjectile.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Characters/Interfaces/CombatAbilities.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UAnimNotify_LaunchProjectile::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -15,6 +17,12 @@ void UAnimNotify_LaunchProjectile::Notify(USkeletalMeshComponent* MeshComp, UAni
 
 	if(ICombatAbilities* CombatAbilities = Cast<ICombatAbilities>(MeshComp->GetOwner()))
 	{
+		if(VFX)
+		{
+			const FRotator Rotation = UKismetMathLibrary::MakeRotFromX(MeshComp->GetOwner()->GetActorLocation());
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(MeshComp->GetWorld(), VFX, MeshComp->GetBoneLocation(BoneNameFirePoint), Rotation);
+		}
+		
 		CombatAbilities->SetProjectileSpawnTransform(MeshComp->GetSocketTransform(BoneNameFirePoint));
 
 		if(const IAbilitySystemInterface* AbilitySystemInterface = Cast<IAbilitySystemInterface>(MeshComp->GetOwner()))

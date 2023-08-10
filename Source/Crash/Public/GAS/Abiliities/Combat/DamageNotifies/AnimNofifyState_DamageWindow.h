@@ -20,6 +20,9 @@ class CRASH_API UAnimNofifyState_DamageWindow : public UAnimNotifyState
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="VFX")
 	UNiagaraSystem* DamagingVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=VFX)
+	bool bDestroyVFXOnNotifyEnd = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HitBox")
 	FName BoneNameSpawn = FName(NAME_None);

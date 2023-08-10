@@ -16,7 +16,7 @@ void UHitStopAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,co
 		return;
 
 	UE_LOG(LogTemp, Warning, TEXT("Start HitStop"));
-	GetActorInfo().OwnerActor.Get()->CustomTimeDilation = 0;
+	GetActorInfo().OwnerActor.Get()->CustomTimeDilation = 0.0;
 }
 
 void UHitStopAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)

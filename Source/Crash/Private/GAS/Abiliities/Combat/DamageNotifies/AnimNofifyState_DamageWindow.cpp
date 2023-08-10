@@ -47,7 +47,7 @@ void UAnimNofifyState_DamageWindow::NotifyEnd(USkeletalMeshComponent* MeshComp, 
 {
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
 
-	if(DamagingVFX && NiagaraComponent)
+	if(DamagingVFX && NiagaraComponent && bDestroyVFXOnNotifyEnd)
 		NiagaraComponent->DestroyComponent();
 	
 	if(ActorHitBox)

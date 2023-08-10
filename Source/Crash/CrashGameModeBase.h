@@ -20,12 +20,7 @@ class CRASH_API ACrashGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
-public:
-	
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Players")
-	int NumberOfPlayers = 2;
 
-	
 protected:
 	UPROPERTY(BlueprintReadOnly, Category="Players")
 	TArray<ACrashPlayerCharacter*> ActiveCharacters;

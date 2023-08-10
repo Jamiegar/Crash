@@ -21,7 +21,6 @@ UKnockbackEffect::UKnockbackEffect()
 	UGameplayTagsManager::Get().RequestGameplayTagContainer(Tags, KnockbackTagContainer);
 	KnockbackCue.GameplayCueTags = KnockbackTagContainer;
 	GameplayCues.Add(KnockbackCue);
-
 	
 	FGameplayAbilitySpecDef AbilitySpecDef;
 	AbilitySpecDef.Ability = UKnockBackAbility::StaticClass();

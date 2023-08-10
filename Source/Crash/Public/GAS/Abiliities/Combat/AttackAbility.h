@@ -6,6 +6,7 @@
 #include "GAS/Abiliities/CrashGameplayAbility.h"
 #include "AttackAbility.generated.h"
 
+class ACrashCharacter;
 class UAbilityTask_WaitGameplayTagRemoved;
 class UKnockbackData;
 class UStunAbilityData;
@@ -55,6 +56,9 @@ protected:
 	virtual void OnGameplayReceivedDamageEvent(FGameplayEventData Payload);
 
 	UFUNCTION()
+	virtual bool DoesTargetHaveCounterAttack(ACrashCharacter* Target);
+	
+	UFUNCTION()
 	void ApplyKnockbackInstantToTarget(FGameplayEventData Payload);
 	void ApplyKnockbackInstantToTarget();
 
@@ -63,10 +67,16 @@ protected:
 
 	UFUNCTION()
 	void ApplyHitStopInstant(FGameplayEventData Payload);
+
+	UFUNCTION()
+	void WaitForHitStopEndAndApplyCounter(FGameplayEventData Payload);
+
+	UFUNCTION()
+	void OnHitStopEndApplyCounter();
 	
 	UFUNCTION()
 	void WaitForHitStopEndAndApplyKnockback(FGameplayEventData Payload);
 
 	UFUNCTION()
-	virtual void OnHitStopTagRemoved();
+	virtual void OnHitStopEndApplyKnockback();
 };

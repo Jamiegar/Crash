@@ -6,6 +6,7 @@
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "AnimNotify_LaunchProjectile.generated.h"
 
+class UNiagaraSystem;
 /**
  * 
  */
@@ -15,6 +16,9 @@ class CRASH_API UAnimNotify_LaunchProjectile : public UAnimNotify
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere, Category="Anim Notify")
+	UNiagaraSystem* VFX;
+	
 	UPROPERTY(EditAnywhere, Category="Anim Notify")
 	FName BoneNameFirePoint;
 

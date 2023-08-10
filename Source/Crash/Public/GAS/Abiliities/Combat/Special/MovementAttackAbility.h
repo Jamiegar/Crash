@@ -24,8 +24,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Movement")
 	UAnimMontage* AttackMontage;
 	
-
-	
 	UMovementAttackAbility();
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;

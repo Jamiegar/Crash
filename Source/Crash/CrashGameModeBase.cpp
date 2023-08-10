@@ -11,9 +11,9 @@ void ACrashGameModeBase::BeginPlay()
 
 	for(int i = 1; i < CharactersToSpawn.Num(); i++)
 	{
-		APlayerController* Controller = UGameplayStatics::CreatePlayer(this, i, true);
+		UGameplayStatics::CreatePlayer(this, i, true);
 	}
-
+	
 	OnGameSetupCompleted.ExecuteIfBound();
 }
 

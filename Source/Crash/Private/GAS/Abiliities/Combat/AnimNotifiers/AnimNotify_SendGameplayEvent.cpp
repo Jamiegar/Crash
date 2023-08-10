@@ -16,7 +16,7 @@ void UAnimNotify_SendGameplayEvent::Notify(USkeletalMeshComponent* MeshComp, UAn
 		if(UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner))
 		{
 			const FGameplayEventData Data;
-			ASC->HandleGameplayEvent(FGameplayTag::RequestGameplayTag(EventTag), &Data);
+			ASC->HandleGameplayEvent(EventTag, &Data);
 		}
 	}
 }

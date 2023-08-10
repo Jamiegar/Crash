@@ -29,17 +29,10 @@ void UProjectileAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	AsyncProjectileFiredEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, FireProjectileTag, nullptr, true);
 	AsyncProjectileFiredEvent->EventReceived.AddUniqueDynamic(this, &UProjectileAttack::OnGameplayReceivedFireProjectile);
 	AsyncProjectileFiredEvent->Activate();
-	
-	if(const USkeletalMeshComponent* SkeletalMesh = ActorInfo->SkeletalMeshComponent.Get())
-	{
-		UAnimInstance* AnimInstance = SkeletalMesh->GetAnimInstance();
 
-		AnimInstance->Montage_Play(ProjectileAttackMontage, 1);
-		
-		FOnMontageEnded Delegate;
-		Delegate.BindUObject(this, &UProjectileAttack::OnMontageFinished);
-		AnimInstance->Montage_SetEndDelegate(Delegate);
-	}
+	FOnMontageEnded Delegate;
+	Delegate.BindUObject(this, &UProjectileAttack::OnMontageFinished);
+	PlayAnimationMontageToOwningActor(ProjectileAttackMontage, Delegate);
 }
 
 void UProjectileAttack::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted)

@@ -47,20 +47,42 @@ void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
 	PayLoadEventData = Payload;
 
-	if(ACrashCharacter* TargetCharacter = Cast<ACrashCharacter>(Payload.Target))
-		TargetCharacter->FaceActor(GetActorInfo().OwnerActor.Get());\
-	
-	const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
-	const FGameplayEffectSpecHandle Handle = MakeEffectSpecHandleFromAbility(UDamageBasicInstant::StaticClass());
-
-	if(!Handle.IsValid())
+	ACrashCharacter* TargetCharacter = Cast<ACrashCharacter>(Payload.Target);
+	if(!TargetCharacter)
 		return;
 	
-	FGameplayEffectSpec* Spec = Handle.Data.Get();
-	Spec->SetSetByCallerMagnitude(GameTags.PlayerDamaged, AbilityDamage); //Sends the Ability damage to the custom damage execute calculation 
-	ApplyAbilityTagsToGameplayEffectSpec(*Handle.Data.Get(), GetCurrentAbilitySpec()); 
-	ApplyGameplayEffectSpecToTargetFromAbility(Handle, Payload.TargetData);
-	
+	TargetCharacter->FaceActor(GetActorInfo().OwnerActor.Get());
+
+	if(DoesTargetHaveCounterAttack(TargetCharacter))
+	{
+		//Counter attacks owner if target is counter attacking
+		UE_LOG(LogTemp, Warning, TEXT("Perform Counter Attack"));
+
+		WaitForHitStopEndAndApplyCounter(Payload);
+	}
+	else
+	{
+		//Perform Normal Damage 
+		const FCrashGameplayTags& GameTags = FCrashGameplayTags::Get();
+		const FGameplayEffectSpecHandle Handle = MakeEffectSpecHandleFromAbility(UDamageBasicInstant::StaticClass());
+
+		if(!Handle.IsValid())
+			return;
+		
+		FGameplayEffectSpec* Spec = Handle.Data.Get();
+		Spec->SetSetByCallerMagnitude(GameTags.PlayerDamaged, AbilityDamage); //Sends the Ability damage to the custom damage execute calculation 
+		ApplyAbilityTagsToGameplayEffectSpec(*Handle.Data.Get(), GetCurrentAbilitySpec()); 
+		ApplyGameplayEffectSpecToTargetFromAbility(Handle, Payload.TargetData);
+	}
+}
+
+bool UAttackAbility::DoesTargetHaveCounterAttack(ACrashCharacter* Target)
+{
+	if(!Target)
+		return false;
+
+	const FGameplayTag CounterTag = FGameplayTag::RequestGameplayTag("Player.State.Counter");
+	return Target->GetAbilitySystemComponent()->HasMatchingGameplayTag(CounterTag);
 }
 
 void UAttackAbility::ApplyKnockbackInstantToTarget(FGameplayEventData Payload)
@@ -124,12 +146,34 @@ void UAttackAbility::ApplyHitStopInstant(FGameplayEventData Payload)
 	if(!HitStopHandle.IsValid())
 		return;
 
-	
-	
 	ApplyAbilityTagsToGameplayEffectSpec(*HitStopHandle.Data.Get(), GetCurrentAbilitySpec());
 
 	ApplyGameplayEffectSpecToTargetFromAbility(HitStopHandle, Payload.TargetData);
 	auto ActiveGameplayEffectHandles = ApplyGameplayEffectSpecToOwnerFromAbility(HitStopHandle);
+}
+
+
+void UAttackAbility::WaitForHitStopEndAndApplyCounter(FGameplayEventData Payload)
+{
+	PayLoadEventData = Payload;
+	
+	ApplyHitStopInstant(Payload);
+
+	FGameplayTag HitStopTag = FGameplayTag::RequestGameplayTag("Player.Damaged.HitStop");
+	AsyncHitStopTagRemoved = UAbilityTask_WaitGameplayTagRemoved::WaitGameplayTagRemove(this, HitStopTag, nullptr, true);
+	AsyncHitStopTagRemoved->Removed.AddUniqueDynamic(this, &UAttackAbility::OnHitStopEndApplyCounter);
+	AsyncHitStopTagRemoved->Activate();
+}
+
+void UAttackAbility::OnHitStopEndApplyCounter()
+{
+	FGameplayEventData CounterData;
+	CounterData.Instigator = PayLoadEventData.Target;
+	CounterData.Target = PayLoadEventData.Instigator;
+
+	UAbilitySystemComponent* TargetComponent = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(PayLoadEventData.Target);
+	const FGameplayTag PerformCounterTag = FGameplayTag::RequestGameplayTag("Event.Counter");
+	TargetComponent->HandleGameplayEvent(PerformCounterTag, &CounterData);
 }
 
 void UAttackAbility::WaitForHitStopEndAndApplyKnockback(FGameplayEventData Payload)
@@ -140,11 +184,11 @@ void UAttackAbility::WaitForHitStopEndAndApplyKnockback(FGameplayEventData Paylo
 
 	FGameplayTag HitStopTag = FGameplayTag::RequestGameplayTag("Player.Damaged.HitStop");
 	AsyncHitStopTagRemoved = UAbilityTask_WaitGameplayTagRemoved::WaitGameplayTagRemove(this, HitStopTag, nullptr, true);
-	AsyncHitStopTagRemoved->Removed.AddUniqueDynamic(this, &UAttackAbility::OnHitStopTagRemoved);
+	AsyncHitStopTagRemoved->Removed.AddUniqueDynamic(this, &UAttackAbility::OnHitStopEndApplyKnockback);
 	AsyncHitStopTagRemoved->Activate();
 }
 
-void UAttackAbility::OnHitStopTagRemoved()
+void UAttackAbility::OnHitStopEndApplyKnockback()
 {
 	ApplyKnockbackInstantToTarget();
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "AnimNotify_SendGameplayEvent.generated.h"
 
@@ -16,7 +17,7 @@ class CRASH_API UAnimNotify_SendGameplayEvent : public UAnimNotify
 
 public:
 	UPROPERTY(EditAnywhere)
-	FName EventTag;
+	FGameplayTag EventTag;
 	
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 };

@@ -8,7 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GAS/Effects/Respawn/RespawnInvincibility.h"
+#include "..\..\Public\GAS\Effects\Respawn\InvincibilityEffect.h"
 
 
 // Sets default values
@@ -58,7 +58,7 @@ void ARespawnAnchor::RespawnCharacter(ACrashCharacter* Character, FVector Target
 	CrashCharacter->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	CrashCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 	CrashCharacter->bEndKnockback = false;
-	CrashCharacter->ApplyEffectToCrashCharacter(URespawnInvincibility::StaticClass());
+	CrashCharacter->ApplyEffectToCrashCharacter(UInvincibilityEffect::StaticClass());
 
 	FOnTimelineEventStatic OnTimelineFinish;
 	FOnTimelineFloat TimelineFloat;

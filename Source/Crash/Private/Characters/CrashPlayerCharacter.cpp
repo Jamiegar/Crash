@@ -146,8 +146,6 @@ void ACrashPlayerCharacter::OnAbilityInputPressed(const FInputActionValue& Actio
 	const TSubclassOf<UCrashGameplayAbility>* AbilityMap = InputAbilityMap.AbilityInputMappingLayout.Find(SourceAction);
 	const EAbilityInputID InputID = AbilityMap->Get()->GetDefaultObject<UCrashGameplayAbility>()->AbilityInputID;
 	SendLocalInputToAbilityComponent(InputID);
-
-	UE_LOG(LogTemp, Warning, TEXT("Action: %s pressed, Activated: %s"), *SourceAction->GetName(), *AbilityMap->Get()->GetName());
 }
 
 void ACrashPlayerCharacter::OnAbilityInputReleased(const FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const UInputAction* SourceAction)
@@ -155,6 +153,7 @@ void ACrashPlayerCharacter::OnAbilityInputReleased(const FInputActionValue& Acti
 	const TSubclassOf<UCrashGameplayAbility>* AbilityMap = InputAbilityMap.AbilityInputMappingLayout.Find(SourceAction);
 	const EAbilityInputID InputID = AbilityMap->Get()->GetDefaultObject<UCrashGameplayAbility>()->AbilityInputID;
 	SendLocalInputToAbilityComponent(InputID, false);
+	
 }
 
 void ACrashPlayerCharacter::BindAbiltiesToInput(UCrashEnhancedInputComponent* CrashInputComponent)
@@ -166,6 +165,7 @@ void ACrashPlayerCharacter::BindAbiltiesToInput(UCrashEnhancedInputComponent* Cr
 	{
 		CrashInputComponent->BindAction(Action, ETriggerEvent::Started, this, "OnAbilityInputPressed");
 		CrashInputComponent->BindAction(Action, ETriggerEvent::Completed, this, "OnAbilityInputReleased");
+		CrashInputComponent->BindAction(Action, ETriggerEvent::Canceled, this, "OnAbilityInputReleased");
 	}
 }
 
