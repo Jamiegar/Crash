@@ -2,13 +2,42 @@
 
 
 #include "CrashGameModeBase.h"
+
+#include "CrashGameInstance.h"
 #include "Characters/CrashPlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
+
+
+void ACrashGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+	
+	if(UCrashGameInstance* GameInstance = Cast<UCrashGameInstance>(UGameplayStatics::GetGameInstance(GetWorld())))
+	{
+		if(GameInstance->PlayerSelection.IsEmpty())
+			return;
+
+		CharactersToSpawn.Empty();
+		
+		TArray<int> OutKeys;
+		GameInstance->PlayerSelection.GenerateKeyArray(OutKeys);
+
+		for (int Key : OutKeys)
+		{
+			TEnumAsByte<EAutoReceiveInput::Type> ID = TEnumAsByte<EAutoReceiveInput::Type>(Key + 1);
+			TSubclassOf<ACrashPlayerCharacter>* Character = GameInstance->PlayerSelection.Find(Key);
+			
+			CharactersToSpawn.Add(ID, Character->Get());
+			UE_LOG(LogTemp, Warning, TEXT("Added: %s to Player: %i"), *Character->Get()->GetName(), ID.GetValue());
+		}
+	}
+}
 
 void ACrashGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
+	
 	for(int i = 1; i < CharactersToSpawn.Num(); i++)
 	{
 		UGameplayStatics::CreatePlayer(this, i, true);
@@ -27,7 +56,7 @@ UClass* ACrashGameModeBase::GetDefaultPawnClassForController_Implementation(ACon
 		
 		if(const TSubclassOf<ACrashPlayerCharacter>* CharacterToSpawn = CharactersToSpawn.Find(TEnumAsByte<EAutoReceiveInput::Type>(ID + 1)))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Controller ID: %i"), ID);
+			UE_LOG(LogTemp, Warning, TEXT("Controller ID: %i Assinged to: %s"), ID, *CharacterToSpawn->Get()->GetName());
 			return CharacterToSpawn->Get();
 		}
 	}

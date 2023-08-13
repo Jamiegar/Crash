@@ -39,9 +39,17 @@ ACrashCharacter::ACrashCharacter()
 	
 	PlayerLocatorWidget = CreateDefaultSubobject<UWidgetComponent>("Character Locator Widget");
 	PlayerLocatorWidget->SetupAttachment(RootComponent);
+	PlayerLocatorWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	PlayerLocatorWidget->SetDrawSize(FVector2D(50, 75));
+	PlayerLocatorWidget->SetRelativeLocation(FVector(0, 0, 200));
 	
 	CrashAttributes = CreateDefaultSubobject<UCrashAttributeSet>("Default Attributes");
 	TimelineComponent = CreateDefaultSubobject<UTimelineComponent>("Timeline");
+
+	static ConstructorHelpers::FObjectFinder<UGameplayEffect> AttributeSetup
+		(TEXT("/Game/Blueprints/GAS/Effects/GE_DefaultAttributeEffect.GE_DefaultAttributeEffect"));
+	
+	DefaultAttributeEffect = AttributeSetup.Object->StaticClass();
 	
 	GetCapsuleComponent()->SetCapsuleRadius(50.f);
 	

@@ -105,7 +105,9 @@ void ACrashPlayerCharacter::InitializePlayerCharacter()
 		if(const UUserWidget* LocatorWidget = PlayerLocatorWidget->GetWidget())
 		{
 			if(LocatorWidget->Implements<UPlayerUILocator>())
+			{
 				IPlayerUILocator::Execute_SetPlayerID(PlayerLocatorWidget->GetWidget(), PlayerController->GetLocalPlayer()->GetControllerId());
+			}
 		}
 	}
 }
