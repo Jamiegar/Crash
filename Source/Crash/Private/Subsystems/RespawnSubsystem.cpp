@@ -12,7 +12,8 @@ void URespawnSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
-	KillZone = CastChecked<AKillZone>(UGameplayStatics::GetActorOfClass(GetWorld(), AKillZone::StaticClass()));
+	if(AActor* Zone = UGameplayStatics::GetActorOfClass(GetWorld(), AKillZone::StaticClass()))
+		KillZone = CastChecked<AKillZone>(Zone);
 }
 
 void URespawnSubsystem::StartRespawnSequence(ACrashCharacter* Character) const

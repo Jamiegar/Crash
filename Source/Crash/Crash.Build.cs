@@ -9,7 +9,7 @@ public class Crash : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] 
-			{ "Core", "CoreUObject", "Engine", "InputCore", "GameplayAbilities", "GameplayTags", "GameplayTasks", "EnhancedInput" });
+			{ "Core", "CoreUObject", "Engine", "InputCore", "GameplayAbilities", "GameplayTags", "GameplayTasks", "EnhancedInput", "UMG" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] 
 			{ "Niagara" });

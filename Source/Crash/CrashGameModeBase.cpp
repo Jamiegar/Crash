@@ -15,6 +15,8 @@ void ACrashGameModeBase::BeginPlay()
 	}
 	
 	OnGameSetupCompleted.ExecuteIfBound();
+
+	GameSetUp();
 }
 
 UClass* ACrashGameModeBase::GetDefaultPawnClassForController_Implementation(AController* InController)

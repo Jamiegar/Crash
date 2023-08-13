@@ -13,7 +13,10 @@
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
-	
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUpdatePercent, float, Percent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUpdateLives, float, Lives);
+
 
 UCLASS()
 class CRASH_API UCrashAttributeSet : public UAttributeSet
@@ -21,6 +24,13 @@ class CRASH_API UCrashAttributeSet : public UAttributeSet
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FUpdatePercent OnPercentUpdated;
+
+	UPROPERTY(BlueprintAssignable)
+	FUpdateLives OnLivesUpdated;
+
+	
 	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, NumberOfJumps);
 	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, Percentage);
 	ATTRIBUTE_ACCESSORS(UCrashAttributeSet, Lives);

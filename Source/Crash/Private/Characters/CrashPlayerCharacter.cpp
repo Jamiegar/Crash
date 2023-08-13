@@ -8,6 +8,7 @@
 #include "Subsystems/CameraSubsystem.h"
 #include "InputMappingContext.h"
 #include "Characters/Input/InputAbilityMap.h"
+#include "Components/WidgetComponent.h"
 #include "GAS/Abiliities/Combat/Basic/BlockAbility.h"
 #include "GAS/Abiliities/Combat/Basic/ComboBasic.h"
 #include "GAS/Abiliities/Combat/Basic/DownBasic.h"
@@ -15,6 +16,7 @@
 #include "GAS/Abiliities/Combat/Basic/SlideAbility.h"
 #include "GAS/Abiliities/Combat/Basic/UpBasic.h"
 #include "GAS/Abiliities/Movement/JumpAbility.h"
+#include "InterfacesUI/PlayerUILocator.h"
 
 
 #define LOCTEXT_NAMESPACE "FAbilityInputMap"
@@ -79,7 +81,7 @@ ACrashPlayerCharacter::ACrashPlayerCharacter()
 		(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/Characters/Input/MovementInput/IA_MovementLeftRight.IA_MovementLeftRight'"));
 
 	MovementAction = DefaultMovementAction.Object;
-
+	
 	InputAbilityMap.LoadDefaults();
 	GiveInputMapAbilitiesToCharacter();
 }
@@ -98,6 +100,12 @@ void ACrashPlayerCharacter::InitializePlayerCharacter()
 			{
 				LocalPlayerSubsystem->AddMappingContext(ContextData.MappingContext, ContextData.Priority);
 			}
+		}
+		
+		if(const UUserWidget* LocatorWidget = PlayerLocatorWidget->GetWidget())
+		{
+			if(LocatorWidget->Implements<UPlayerUILocator>())
+				IPlayerUILocator::Execute_SetPlayerID(PlayerLocatorWidget->GetWidget(), PlayerController->GetLocalPlayer()->GetControllerId());
 		}
 	}
 }

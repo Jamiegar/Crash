@@ -11,6 +11,8 @@
 #include "Interfaces/CombatAbilities.h"
 #include "CrashCharacter.generated.h"
 
+class UCharacterUIDataInfo;
+class UWidgetComponent;
 class UTimelineComponent;
 class UKnockbackComponent;
 class UCombatComponent;
@@ -19,6 +21,28 @@ class UCrashGameplayAbility;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCharacterKnockOut);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnKillCharacter);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFallingDown);
+
+USTRUCT(BlueprintType, Blueprintable)
+struct FCharacterUIInfo
+{
+	GENERATED_BODY()
+public:
+	FCharacterUIInfo()
+	{
+		CharacterPortrait = nullptr;
+		CharacterColor = FLinearColor::White;
+		CharacterName = FText();
+	}
+	
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="UI Info")
+	UTexture2D* CharacterPortrait = nullptr;
+	
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="UI Info")
+	FLinearColor CharacterColor = FLinearColor::White;;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="UI Info")
+	FText CharacterName = FText();
+};
 
 UCLASS(Abstract)
 class CRASH_API ACrashCharacter : public ACharacter, public IAbilitySystemInterface, public ICombatAbilities
@@ -84,9 +108,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="Timeline")
 	UTimelineComponent* TimelineComponent;
 
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="User Interface")
+	UWidgetComponent* PlayerLocatorWidget;
+
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	USceneComponent* MeshAttachment;
 
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Crash User Interface")
+	FCharacterUIInfo UIData = FCharacterUIInfo();
+	
 	UPROPERTY(BlueprintReadOnly, Category="Movement")
 	FTimerHandle FallingDownTimerHandle;
 
@@ -100,12 +130,17 @@ public:
 	void SetDefaultMesh() const;
 	void AddDefaultAbilities();
 	
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilityComponent; };
-	UCrashAttributeSet* GetCrashAttributeSet() const;
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilityComponent; }
+
+	UFUNCTION(BlueprintCallable)
+	UCrashAttributeSet* GetCrashAttributeSet() const {return CrashAttributes; };
 	
 	UKnockbackComponent* GetKnockbackComponent() const { return KnockbackComponent; }
 	UTimelineComponent* GetTimelineComponent() const { return TimelineComponent; }
 	USceneComponent* GetMeshAttachmentPoint() const {return  MeshAttachment; }
+
+	UFUNCTION(BlueprintCallable)
+	FCharacterUIInfo GetCharacterUIDataInfoUIData() { return UIData; }
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void InitializeAttributes();

@@ -2,7 +2,6 @@
 
 
 #include "Characters/CrashCharacter.h"
-
 #include "GameplayTagsManager.h"
 #include "Characters/CombatComponents/CombatComponent.h"
 #include "Characters/CombatComponents/KnockbackComponent.h"
@@ -14,6 +13,7 @@
 #include "GAS/Effects/AirborneEffect.h"
 #include "GAS/Effects/GroundedEffect.h"
 #include "Components/TimelineComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GAS/CrashAbilitySystemComponent.h"
 #include "GAS/Abiliities/Combat/AirAttackAbility.h"
 #include "GAS/Abiliities/Combat/Damage/DeathEffect.h"
@@ -36,6 +36,9 @@ ACrashCharacter::ACrashCharacter()
 	MeshAttachment = CreateDefaultSubobject<USceneComponent>("Mesh Attachment");
 	MeshAttachment->SetupAttachment(RootComponent);
 	GetMesh()->SetupAttachment(MeshAttachment, MeshAttachment->GetAttachSocketName());
+	
+	PlayerLocatorWidget = CreateDefaultSubobject<UWidgetComponent>("Character Locator Widget");
+	PlayerLocatorWidget->SetupAttachment(RootComponent);
 	
 	CrashAttributes = CreateDefaultSubobject<UCrashAttributeSet>("Default Attributes");
 	TimelineComponent = CreateDefaultSubobject<UTimelineComponent>("Timeline");
@@ -79,11 +82,6 @@ void ACrashCharacter::AddDefaultAbilities()
 	DefaultAbilities.Add(UBlockAbility::StaticClass());
 	DefaultAbilities.Add(USlideAbility::StaticClass());
 	DefaultAbilities.Add(UAirAttackAbility::StaticClass());
-}
-
-UCrashAttributeSet* ACrashCharacter::GetCrashAttributeSet() const
-{
-	return CrashAttributes;
 }
 
 void ACrashCharacter::CheckFallingDown()
@@ -184,7 +182,7 @@ void ACrashCharacter::SetUpDefaultMovementValues()
 void ACrashCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-
+	
 	if(AbilityComponent)
 		AbilityComponent->InitAbilityActorInfo(this, this);
 

@@ -42,7 +42,9 @@ void UCameraSubsystem::RegisterPlayerToCamera(const ACharacter* Character)
 		return;
 
 	if(APlayerController* PlayerController = Cast<APlayerController>(Character->GetController())) //True == player character
+	{
 		PlayerController->SetViewTarget(GetCamera());
+	}
 
 	RegisteredCharacters.Add(Character);
 }

@@ -22,6 +22,9 @@ class CRASH_API ACrashGameModeBase : public AGameModeBase
 
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Players")
+	TMap<TEnumAsByte<EAutoReceiveInput::Type>, TSubclassOf<ACrashPlayerCharacter>> CharactersToSpawn;
+	
 	UPROPERTY(BlueprintReadOnly, Category="Players")
 	TArray<ACrashPlayerCharacter*> ActiveCharacters;
 	
@@ -29,10 +32,8 @@ protected:
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 	
-
-private:
-	UPROPERTY(EditDefaultsOnly, Category="Players")
-	TMap<TEnumAsByte<EAutoReceiveInput::Type>, TSubclassOf<ACrashPlayerCharacter>> CharactersToSpawn;
+	UFUNCTION(BlueprintImplementableEvent, Category="Initialisation")
+	void GameSetUp();
 	
 	
 };
