@@ -19,7 +19,7 @@ void UAnimNotify_LaunchProjectile::Notify(USkeletalMeshComponent* MeshComp, UAni
 	{
 		if(VFX)
 		{
-			const FRotator Rotation = UKismetMathLibrary::MakeRotFromX(MeshComp->GetOwner()->GetActorLocation());
+			const FRotator Rotation = UKismetMathLibrary::MakeRotFromX(MeshComp->GetOwner()->GetActorForwardVector());
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(MeshComp->GetWorld(), VFX, MeshComp->GetBoneLocation(BoneNameFirePoint), Rotation);
 		}
 		

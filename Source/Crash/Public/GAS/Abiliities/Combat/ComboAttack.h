@@ -33,6 +33,9 @@ protected:
 
 private:
 	UPROPERTY()
+	float DefaultAttackDamage;
+	
+	UPROPERTY()
 	UAbilityTask_PlayMontageAndWait* MontageWaitTask;
 
 	UPROPERTY()

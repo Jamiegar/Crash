@@ -7,10 +7,15 @@
 #include "Abilities/Tasks/AbilityTask_WaitDelay.h"
 #include "Characters/CrashCharacter.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
+#include "AssetTypeActions/AssetDefinition_SoundBase.h"
 #include "Characters/CombatComponents/KnockbackComponent.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/CrashAttributeSet.h"
 #include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
+#include "GAS/Effects/Respawn/InvincibilityEffect.h"
+#include "Kismet/GameplayStatics.h"
+#include "Subsystems/CameraSubsystem.h"
 
 UKnockBackAbility::UKnockBackAbility()
 {
@@ -23,6 +28,15 @@ UKnockBackAbility::UKnockBackAbility()
 		(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/Characters/Animation/Montages/GetUp/AnimMon_GetUp.AnimMon_GetUp'"));
 	
 	GetUpMontage = DefaultGetUp.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> DefaultKnockbackStartSound
+		(TEXT("/Script/MetasoundEngine.MetaSoundSource'/Game/Blueprints/MetaSounds/CharacterAttacks/MS_KnockbackStartEffect.MS_KnockbackStartEffect'"));
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> DefaultKnockbackGroundSound
+		(TEXT("/Script/MetasoundEngine.MetaSoundSource'/Game/Blueprints/MetaSounds/CharacterAttacks/MS_KnckbackEndEffect.MS_KnckbackEndEffect'"));
+
+	KnockbackSoundData.KnockbackStartSoundEffect = DefaultKnockbackStartSound.Object;
+	KnockbackSoundData.KnockbackEndSoundEffect = DefaultKnockbackGroundSound.Object;
 }
 
 void UKnockBackAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -44,7 +58,8 @@ void UKnockBackAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle, c
 	bool bReplicateCancelAbility)
 {
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
-
+	
+	TargetCharacter->bCanMove = true;
 	TargetCharacter->GetKnockbackComponent()->StopFaceVelocity();
 	
 	FGameplayTagContainer KnockbackTagContainer;
@@ -69,12 +84,14 @@ void UKnockBackAbility::OnReceivedKnockbackData(FGameplayEventData Payload)
 	Direction.Normalize();
 	Direction += FVector(0, 0, 1);
 	
-	UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
 	TargetCharacter = CastChecked<ACrashCharacter>(Payload.Target);
 	
 	if(const UCrashAttributeSet* Attribute = TargetCharacter->GetCrashAttributeSet())
 	{
-		float KnockbackMag = Attribute->GetKnockback();
+		KnockbackMag = Attribute->GetKnockback();
+
+		if(KnockbackMag < KnockbackData->MinKnockbackMagnitude)
+			KnockbackMag = KnockbackData->MinKnockbackMagnitude;
 
 		FVector LaunchVelocity = Direction * KnockbackMag;
 		LaunchVelocity.X *= KnockbackData->HorizontalForce;
@@ -84,10 +101,18 @@ void UKnockBackAbility::OnReceivedKnockbackData(FGameplayEventData Payload)
 		TargetCharacter->bIsKnockedBack = true;
 		TargetCharacter->GetKnockbackComponent()->StartFaceVelocityDirection();
 
+		KnockbackAudio = UGameplayStatics::SpawnSoundAttached(KnockbackSoundData.KnockbackStartSoundEffect, GetActorInfo().OwnerActor.Get()->GetRootComponent());
+
+		UCameraSubsystem* CameraSubsystem = GetWorld()->GetSubsystem<UCameraSubsystem>();
+		const float Trauma = KnockbackMag / 2500;
+		CameraSubsystem->ApplyCameraShake(Trauma, 1.5, 400, 75, 0.5, 1.5);
+
 		const FGameplayTag GroundedTag = FGameplayTag::RequestGameplayTag("Player.State.Grounded");
 		AsyncEventWaitUntilGrounded = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, GroundedTag, nullptr, true, true);
 		AsyncEventWaitUntilGrounded->EventReceived.AddUniqueDynamic(this, &UKnockBackAbility::OnCharacterGrounded);
 		AsyncEventWaitUntilGrounded->Activate();
+
+		
 	}
 	
 }
@@ -99,20 +124,19 @@ void UKnockBackAbility::OnCharacterGrounded(FGameplayEventData Payload)
 	WaitAsyncKncokbackEnd->Activate();
 
 	TargetCharacter->bCanMove = false;
+
+	KnockbackAudio->FadeOut(0.5, 0);
+	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), KnockbackSoundData.KnockbackEndSoundEffect, GetActorInfo().OwnerActor.Get()->GetActorLocation());
+
+	UCameraSubsystem* CameraSubsystem = GetWorld()->GetSubsystem<UCameraSubsystem>();
+	const float Trauma = KnockbackMag / 1000; 
+	CameraSubsystem->ApplyCameraShake(Trauma, 2.5f, 300, 45, 0.4, 0.5);
 }
 
 void UKnockBackAbility::OnKnockbackGroundedFinished()
 {
-	if(const USkeletalMeshComponent* SkeletalMeshComponent = GetActorInfo().SkeletalMeshComponent.Get())
-	{
-		UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance();
-
-		AnimInstance->Montage_Play(GetUpMontage, 1);
-
-		FOnMontageEnded Delegate;
-		Delegate.BindUObject(this, &UKnockBackAbility::GetupMontageFinished);
-		AnimInstance->Montage_SetEndDelegate(Delegate);
-	}
+	FOnMontageEnded Delegate = FOnMontageEnded::CreateUObject(this, &UKnockBackAbility::GetupMontageFinished);
+	PlayAnimationMontageToOwningActor(GetUpMontage, Delegate);
 	
 	TargetCharacter->GetKnockbackComponent()->StopFaceVelocity();
 }
@@ -120,12 +144,16 @@ void UKnockBackAbility::OnKnockbackGroundedFinished()
 void UKnockBackAbility::GetupMontageFinished(UAnimMontage* Montage, bool bInterrupted)
 {
 	TargetCharacter->bCanMove = true;
-	EndCrashAbility();
-
+	UE_LOG(LogTemp, Warning, TEXT("Can Move"));
+	
 	FGameplayTagContainer KnockbackTagContainer;
 	TArray<FString> Tags;
 	Tags.Add("Player.Damaged.Knockback");
 	UGameplayTagsManager::Get().RequestGameplayTagContainer(Tags, KnockbackTagContainer);
-	
+
 	BP_RemoveGameplayEffectFromOwnerWithGrantedTags(KnockbackTagContainer);
+	
+	EndCrashAbility();
 }
+
+

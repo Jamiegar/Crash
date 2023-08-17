@@ -19,7 +19,9 @@
 #include "GAS/Abiliities/Combat/Damage/DeathEffect.h"
 #include "GAS/Abiliities/Combat/Damage/RespawnAbility.h"
 #include "GAS/Effects/Damaging/DamageLivesInstant.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Subsystems/CameraSubsystem.h"
 
 
 // Sets default values
@@ -50,6 +52,11 @@ ACrashCharacter::ACrashCharacter()
 		(TEXT("/Game/Blueprints/GAS/Effects/GE_DefaultAttributeEffect.GE_DefaultAttributeEffect"));
 	
 	DefaultAttributeEffect = AttributeSetup.Object->StaticClass();
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> DefaultDeathSound
+		(TEXT("/Script/MetasoundEngine.MetaSoundSource'/Game/Blueprints/MetaSounds/CharacterDeath/MS_CharacterDeath.MS_CharacterDeath'"));
+
+	CharacterAudioData.CharacterDeathEffect = DefaultDeathSound.Object;
 	
 	GetCapsuleComponent()->SetCapsuleRadius(50.f);
 	
@@ -244,6 +251,12 @@ void ACrashCharacter::KillCharacter()
 	ApplyEffectToCrashCharacter(UDeathEffect::StaticClass());
 	ApplyEffectToCrashCharacter(UDamageLivesInstant::StaticClass());
 
+	UCameraSubsystem* CameraSubsystem = GetWorld()->GetSubsystem<UCameraSubsystem>();
+	const float Trauma = 1;
+	CameraSubsystem->ApplyCameraShake(Trauma, 2, 450, 350, 0.8, 1.5);
+
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), CharacterAudioData.CharacterDeathEffect, GetActorLocation(), FRotator::ZeroRotator);
+	
 	if(GetCrashAttributeSet()->GetLives() <= 0)
 	{
 		OnCharacterKnockedOut.Broadcast();

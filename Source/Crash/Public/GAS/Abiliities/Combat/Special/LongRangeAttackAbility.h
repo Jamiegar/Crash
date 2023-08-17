@@ -7,9 +7,9 @@
 #include "LongRangeAttackAbility.generated.h"
 
 class ACrashCharacter;
-/**
- * 
- */
+
+
+
 UCLASS()
 class CRASH_API ULongRangeAttackAbility : public UAttackAbility
 {
@@ -23,9 +23,10 @@ public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	void OnAttackMontageEnd(UAnimMontage* Montage, bool bInterrupted);
 
-	virtual  void OnGameplayReceivedDamageEvent(FGameplayEventData Payload) override;
+	virtual void OnGameplayReceivedDamageEvent(FGameplayEventData Payload) override;
 
 private:
 	UPROPERTY()
 	ACrashCharacter* OwnerCharacter = nullptr;
+	
 };

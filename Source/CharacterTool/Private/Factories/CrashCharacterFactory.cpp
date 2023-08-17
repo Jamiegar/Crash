@@ -7,6 +7,7 @@
 #include "KismetCompilerModule.h"
 #include "CharacterTool/Public/Filters/FClassPickerViewFilter.h"
 #include "Characters/CrashPlayerCharacter.h"
+#include "ContentBrowser/Private/SContentBrowser.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Kismet2/SClassPickerDialog.h"
 
@@ -35,6 +36,8 @@ bool UCrashCharacterFactory::ConfigureProperties()
 	{
 		ParentClass = ChosenClass;
 	}
+
+	
 	
 	return bPressedOk;
 }

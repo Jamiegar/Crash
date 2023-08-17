@@ -4,6 +4,7 @@
 #include "GAS/Abiliities/Combat/Special/LongRangeAttackAbility.h"
 
 #include "Characters/CrashCharacter.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ULongRangeAttackAbility::ULongRangeAttackAbility()
@@ -32,12 +33,15 @@ void ULongRangeAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
 	FOnMontageEnded OnMontageEnded = FOnMontageEnded::CreateUObject(this, &ULongRangeAttackAbility::OnAttackMontageEnd);
 	PlayAnimationMontageToOwningActor(AttackMontage, OnMontageEnded);
 
+	PlayMissedAttackSound();
+	
 	WaitForDamageEffect();
 }
 
 void ULongRangeAttackAbility::OnAttackMontageEnd(UAnimMontage* Montage, bool bInterrupted)
 {
 	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	
 	EndCrashAbility();
 }
 
@@ -45,4 +49,6 @@ void ULongRangeAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData P
 {
 	Super::OnGameplayReceivedDamageEvent(Payload);
 	WaitForHitStopEndAndApplyKnockback(Payload);
+
+	PlayContactHitAttackSound();
 }

@@ -23,6 +23,8 @@ void UCounterAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	if(!CommitCrashAbility())
 		return;
 
+	PlaySoundAtOwnerLocation(CounterAttackSoundData.CounterDodgeSoundEffect);
+	
 	const FGameplayEffectSpecHandle CounterEffectSpecHandle = MakeOutgoingGameplayEffectSpec(UCounterAttackEffect::StaticClass());
 	ApplyAbilityTagsToGameplayEffectSpec(*CounterEffectSpecHandle.Data.Get(), GetCurrentAbilitySpec());
 	CounterEffectSpecHandle.Data->SetDuration(CounterEffectDuration, true);
@@ -46,6 +48,7 @@ void UCounterAttackAbility::OnCounterAttackEventReceived(FGameplayEventData Payl
 	FOnMontageEnded OnMontageEnded = FOnMontageEnded::CreateUObject(this, &UCounterAttackAbility::OnAttackMontageEnded);
 	PlayAnimationMontageToOwningActor(CounterAttack, OnMontageEnded);
 
+	PlaySoundAtOwnerLocation(CounterAttackSoundData.CounterReceivedSoundEffect);
 	WaitForDamageEffect();
 }
 
@@ -64,4 +67,5 @@ void UCounterAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Pay
 {
 	Super::OnGameplayReceivedDamageEvent(Payload);
 	WaitForHitStopEndAndApplyKnockback(Payload);
+	PlayContactHitAttackSound();
 }

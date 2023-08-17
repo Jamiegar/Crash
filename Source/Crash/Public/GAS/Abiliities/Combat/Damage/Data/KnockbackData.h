@@ -23,6 +23,9 @@ public:
 	float KnockbackGroundedDuration = 0.5;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float MinKnockbackMagnitude = 400.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldCorkscrew = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

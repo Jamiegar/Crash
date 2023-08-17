@@ -49,4 +49,22 @@ void UCameraSubsystem::RegisterPlayerToCamera(const ACharacter* Character)
 	RegisteredCharacters.Add(Character);
 }
 
+void UCameraSubsystem::ApplyCameraShake(float Trauma, float Decay, float TraumaMultiplier, float TraumaMagnitude, float TraumaRotationalMagnitude, float TraumaDepthMagnitude)
+{
+	UActorComponent* Component = CameraActor->GetComponentByClass(UCameraShakeComponent::StaticClass());
+	UCameraShakeComponent* ShakeComponent =  CastChecked<UCameraShakeComponent>(Component);
+
+	ShakeComponent->SetShakeActive(false);
+	
+	ShakeComponent->AddTrauma(Trauma);
+	ShakeComponent->SetDecay(Decay);
+	ShakeComponent->SetTraumaMultiplier(TraumaMultiplier);
+	ShakeComponent->SetTraumaMagnitude(TraumaMagnitude);
+	ShakeComponent->SetTraumaRotationalMagnitude(TraumaRotationalMagnitude);
+	ShakeComponent->SetTraumaDepthMagnitude(TraumaDepthMagnitude);
+
+	ShakeComponent->SetShakeActive(true);
+}
+
+
 

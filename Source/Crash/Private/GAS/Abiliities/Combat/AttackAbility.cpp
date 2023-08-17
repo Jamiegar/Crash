@@ -14,6 +14,8 @@
 #include "GAS/Abiliities/Combat/Damage/StunAbility.h"
 #include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
 #include "GAS/Effects/Damaging/HitStopEffect.h"
+#include "Kismet/GameplayStatics.h"
+#include "Subsystems/CameraSubsystem.h"
 
 UAttackAbility::UAttackAbility()
 {
@@ -23,6 +25,15 @@ UAttackAbility::UAttackAbility()
 	CancelAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag("Player.Combo"));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Blocking"));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Attack"));
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> DefaultMissedSoundEffect
+		(TEXT("/Script/MetasoundEngine.MetaSoundSource'/Game/Blueprints/MetaSounds/CharacterAttacks/MS_AttackNoContactWhoost.MS_AttackNoContactWhoost'"));
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> DefaultContactSoundEffect
+			(TEXT("/Script/MetasoundEngine.MetaSoundSource'/Game/Blueprints/MetaSounds/CharacterAttacks/MS_AttackContactHit.MS_AttackContactHit'"));
+	
+	SoundData.MissedAttackSound = DefaultMissedSoundEffect.Object;
+	SoundData.ContactHitSound = DefaultContactSoundEffect.Object;
 }
 
 void UAttackAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -50,14 +61,16 @@ void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 	ACrashCharacter* TargetCharacter = Cast<ACrashCharacter>(Payload.Target);
 	if(!TargetCharacter)
 		return;
+
+	UCameraSubsystem* CameraSubsystem = GetWorld()->GetSubsystem<UCameraSubsystem>();
+	const float Trauma = (AbilityDamage / 20) * 3.5;
+	CameraSubsystem->ApplyCameraShake(Trauma, 2, 400, 75, 0.5, 1.5);
 	
 	TargetCharacter->FaceActor(GetActorInfo().OwnerActor.Get());
 
 	if(DoesTargetHaveCounterAttack(TargetCharacter))
 	{
 		//Counter attacks owner if target is counter attacking
-		UE_LOG(LogTemp, Warning, TEXT("Perform Counter Attack"));
-
 		WaitForHitStopEndAndApplyCounter(Payload);
 	}
 	else
@@ -107,6 +120,7 @@ void UAttackAbility::ApplyKnockbackInstantToTarget(FGameplayEventData Payload)
 		
 	UAbilitySystemComponent* TargetComponent = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Payload.Target);
 	TargetComponent->HandleGameplayEvent(FGameplayTag::RequestGameplayTag("Event.Data.Knockback"), &EventKnockbackData);
+	
 }
 
 void UAttackAbility::ApplyKnockbackInstantToTarget()
@@ -140,7 +154,7 @@ void UAttackAbility::ApplyHitStopInstant(FGameplayEventData Payload)
 	PayLoadEventData = Payload;
 	
 	const FGameplayEffectSpecHandle HitStopHandle = MakeEffectSpecHandleFromAbility(UHitStopEffect::StaticClass());
-	const float HitStopDuration = AbilityDamage / 20; 
+	const float HitStopDuration = (AbilityDamage / 20) * 2; 
 	HitStopHandle.Data.Get()->SetDuration(HitStopDuration, true);
 	
 	if(!HitStopHandle.IsValid())
@@ -191,4 +205,20 @@ void UAttackAbility::WaitForHitStopEndAndApplyKnockback(FGameplayEventData Paylo
 void UAttackAbility::OnHitStopEndApplyKnockback()
 {
 	ApplyKnockbackInstantToTarget();
+}
+
+void UAttackAbility::PlayMissedAttackSound()
+{
+	PlaySoundAtOwnerLocation(SoundData.MissedAttackSound);
+}
+
+void UAttackAbility::PlayContactHitAttackSound()
+{
+	PlaySoundAtOwnerLocation(SoundData.ContactHitSound);
+}
+
+UAudioComponent* UAttackAbility::PlaySoundAtOwnerLocation(USoundBase* Sound)
+{
+	const AActor* OwnerTransform = GetActorInfo().OwnerActor.Get();
+	return UGameplayStatics::SpawnSoundAtLocation(OwnerTransform->GetWorld(), Sound, OwnerTransform->GetActorLocation(), FRotator::ZeroRotator);
 }

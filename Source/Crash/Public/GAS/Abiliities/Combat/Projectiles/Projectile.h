@@ -7,9 +7,23 @@
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
+class UNiagaraSystem;
 class UCapsuleComponent;
 class UNiagaraComponent;
 class UProjectileMovementComponent;
+
+USTRUCT(Blueprintable)
+struct FProjectileSoundData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* ProjectileFlyingLoop;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* ProjectileHit;
+};
+
 
 UCLASS(Blueprintable)
 class CRASH_API AProjectile : public AActor
@@ -29,17 +43,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Projectile")
 	UProjectileMovementComponent* ProjectileComponent;
 
-	UPROPERTY()
-	FGameplayEffectSpecHandle ProjectileHitEffectHandle; 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	UNiagaraSystem* OnDestroyedVFX;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	FProjectileSoundData ProjectileSoundData;
+
 	
 	
 public:
 	// Sets default values for this actor's properties
 	AProjectile();
 
-	UFUNCTION(BlueprintCallable, Category="Damaging")
-	void SetDamagingEffectHandle(const FGameplayEffectSpecHandle DamagingSpecHandle) { ProjectileHitEffectHandle = DamagingSpecHandle; }
-	
+	virtual void BeginPlay() override;
+
 
 protected:
 	void SetDefaultProjectileMovementValues();
@@ -47,6 +64,6 @@ protected:
 	UFUNCTION()
 	void OnCollisionComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	virtual FGameplayEffectSpecHandle CreateDefaultEffect(UAbilitySystemComponent* AbilityComponent);
-	
+	UPROPERTY()
+	UAudioComponent* LoopingProjectileAudioComponent;
 };

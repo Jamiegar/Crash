@@ -17,13 +17,14 @@ ACrashCamera::ACrashCamera()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("Camera"); //Create and attach camera component by default
 	
 	SpringArm->SetupAttachment(RootComponent);
-	CameraComponent->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-
-	CameraBounds = CreateDefaultSubobject<UBoxComponent>("Camera Bounds");
-	
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->CameraLagSpeed = 5.f;
+	
+	CameraComponent->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
+
+	CameraBounds = CreateDefaultSubobject<UBoxComponent>("Camera Bounds");
+	ShakeComponent = CreateDefaultSubobject<UCameraShakeComponent>("Shake Component");
 	
 	SetActorTickEnabled(false);
 }
@@ -88,7 +89,7 @@ void ACrashCamera::CameraMovement(float DeltaTime)
 	const FVector AverageLocation = CalculateAverageLocation(ActiveCharacters);
 	
 	FVector NewLocation = FMath::VInterpTo(PreviousLocation, AverageLocation, DeltaTime, CameraMoveSpeed); //Interps the Look at component to the new location
-	NewLocation += CameraMovementOffset; //Adds an offset to the new location, as the character position is at the feet and so the average Location could be too low  
+	//NewLocation += CameraMovementOffset; //Adds an offset to the new location, as the character position is at the feet and so the average Location could be too low  
 	
 	FVector OutMin;
 	FVector OutMax;

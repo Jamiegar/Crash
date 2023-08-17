@@ -45,6 +45,7 @@ void UAirAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		AnimInstance->Montage_SetEndDelegate(Delegate);
 	}
 
+	PlayMissedAttackSound();
 	WaitForDamageEffect();
 }
 
@@ -56,6 +57,7 @@ void UAirAttackAbility::OnMontageFinished(UAnimMontage* AnimMontage, bool bInter
 void UAirAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
 	Super::OnGameplayReceivedDamageEvent(Payload);
+	WaitForHitStopEndAndApplyKnockback(Payload);
 
-	ApplyKnockbackInstantToTarget(Payload);
+	PlayContactHitAttackSound();
 }

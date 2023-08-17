@@ -6,9 +6,19 @@
 #include "GAS/Abiliities/Combat/AttackAbility.h"
 #include "CounterAttackAbility.generated.h"
 
-/**
- * 
- */
+USTRUCT(Blueprintable)
+struct FCounterAttackSoundData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* CounterDodgeSoundEffect;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* CounterReceivedSoundEffect;
+};
+
+
 UCLASS()
 class CRASH_API UCounterAttackAbility : public UAttackAbility
 {
@@ -20,12 +30,16 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Counter")
 	float CounterEffectDuration = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	FCounterAttackSoundData CounterAttackSoundData;
 	
 	UCounterAttackAbility();
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
 private:
+	
 	UPROPERTY()
 	bool bShouldAttack = false;
 	

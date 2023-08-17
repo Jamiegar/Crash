@@ -22,6 +22,7 @@ UComboAttack::UComboAttack()
 		(TEXT("/Script/Crash.KnockbackData'/Game/Blueprints/GAS/Abilities/Combat/Data/KnockbackData/DA_DefaultKnockback.DA_DefaultKnockback'"));
 	
 	KnockbackData = DefaultKnockbackData.Object;
+	DefaultAttackDamage = AbilityDamage;
 }
 
 void UComboAttack::PostInitProperties()
@@ -52,7 +53,8 @@ void UComboAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 		return;
 	
 	ComboCount = 0;
-
+	AbilityDamage = DefaultAttackDamage / 2;
+	
 	NextAttackInSequence();
 }
 
@@ -67,6 +69,7 @@ void UComboAttack::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
 	Super::OnGameplayReceivedDamageEvent(Payload);
 
+	PlayContactHitAttackSound();
 	if(ComboCount == ComboMontages.Num()-1)
 	{
 		WaitForHitStopEndAndApplyKnockback(Payload);
@@ -81,10 +84,11 @@ void UComboAttack::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 void UComboAttack::NextAttackInSequence()
 {
 	MontageWaitTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, "None", GetMontageToPlay());
-
 	MontageWaitTask->OnCompleted.AddUniqueDynamic(this, &UComboAttack::OnMontageFinished);
 	MontageWaitTask->Activate();
 
+	PlayMissedAttackSound();
+	
 	bIsComboWindowOpen = false;
 	WaitForDamageEffect(); //Async Task waits for the damage effect
 
@@ -138,6 +142,12 @@ void UComboAttack::OnGameplayReceivedComboClose(FGameplayEventData Payload)
 	if(bDidRequestCombo)
 	{
 		ComboCount++;
+
+		if(ComboCount < ComboMontages.Num()-1)
+			AbilityDamage = DefaultAttackDamage / 2;
+		else
+			AbilityDamage = DefaultAttackDamage;
+		
 		NextAttackInSequence();
 	}
 }

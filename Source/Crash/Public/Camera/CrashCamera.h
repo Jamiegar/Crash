@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CameraShakeComponent.h"
 #include "GameFramework/Actor.h"
 #include "CrashCamera.generated.h"
 
 
+class UCameraShakeComponent;
 class UBoxComponent;
 class UCameraComponent;
 class USpringArmComponent;
@@ -21,9 +23,14 @@ public:
 	ACrashCamera();
 
 	void SetActiveCharacters(const TArray<const ACharacter*>& Characters);
-
 	virtual void OnConstruction(const FTransform& Transform) override;
-	
+
+	UFUNCTION(BlueprintCallable, Category="Camera")
+	UCameraComponent* GetCameraComponent() { return CameraComponent; }
+
+	UFUNCTION(BlueprintCallable, Category="Camera Shake")
+	UCameraShakeComponent* GetShakeComponent() { return ShakeComponent; }
+
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Camera Movement")
 	float CameraMoveSpeed = 3.5;
@@ -52,8 +59,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	USpringArmComponent* SpringArm;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	UCameraComponent* CameraComponent;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Camera Shake")
+	UCameraShakeComponent* ShakeComponent;
 
 	UPROPERTY()
 	TArray<const ACharacter*> ActiveCharacters;

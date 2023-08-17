@@ -8,9 +8,18 @@
 
 class UAbilityTask_WaitInputRelease;
 
-/**
- * 
- */
+USTRUCT(Blueprintable)
+struct FChargeAttackSoundData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* ChargeStartSoundEffect;
+	
+};
+
+
+
 UCLASS()
 class CRASH_API UChargeAttackAbility : public UAttackAbility
 {
@@ -29,6 +38,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input Duration")
 	float MaxInputDuration = 3.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	FChargeAttackSoundData ChargeAttackSoundData;
 	
 	UChargeAttackAbility();
 

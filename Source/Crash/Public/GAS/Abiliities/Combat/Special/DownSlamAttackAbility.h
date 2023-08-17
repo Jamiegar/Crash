@@ -7,9 +7,20 @@
 #include "DownSlamAttackAbility.generated.h"
 
 class ACrashCharacter;
-/**
- * 
- */
+
+USTRUCT(Blueprintable)
+struct FDownSlamSoundData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* BuildUpSoundEffect;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* GroundSlamSoundEffect;
+};
+
+
 UCLASS()
 class CRASH_API UDownSlamAttackAbility : public UAttackAbility
 {
@@ -24,6 +35,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Movement")
 	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	FDownSlamSoundData DownSlamSoundData;
 	
 	UDownSlamAttackAbility();
 

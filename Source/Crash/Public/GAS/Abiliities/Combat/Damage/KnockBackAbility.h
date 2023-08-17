@@ -10,9 +10,20 @@ class ACrashCharacter;
 class UAbilityTask_WaitDelay;
 class UKnockbackData;
 class UAbilityTask_WaitGameplayEvent;
-/**
- * 
- */
+
+USTRUCT(Blueprintable)
+struct FKnockbackSoundData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* KnockbackStartSoundEffect;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* KnockbackEndSoundEffect;
+};
+
+
 UCLASS()
 class CRASH_API UKnockBackAbility : public UCrashGameplayAbility
 {
@@ -32,15 +43,24 @@ public:
 	UPROPERTY()
 	UAnimMontage* GetUpMontage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	FKnockbackSoundData KnockbackSoundData;
+
 private:
 	UPROPERTY()
 	ACrashCharacter* TargetCharacter;
 
 	UPROPERTY()
 	UKnockbackData* KnockbackData;
+
+	UPROPERTY()
+	float KnockbackMag;
 	
 	UPROPERTY()
 	UAbilityTask_WaitGameplayEvent* AsyncEventKnockbackData;
+
+	UPROPERTY()
+	UAudioComponent* KnockbackAudio;
 
 	UFUNCTION()
 	void OnReceivedKnockbackData(FGameplayEventData Payload);
@@ -59,5 +79,7 @@ private:
 
 	UFUNCTION()
 	void GetupMontageFinished(UAnimMontage* Montage, bool bInterrupted);
+
+	void ApplyInvincibility();
 
 };

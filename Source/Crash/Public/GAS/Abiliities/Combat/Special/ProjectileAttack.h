@@ -7,9 +7,8 @@
 #include "ProjectileAttack.generated.h"
 
 class AProjectile;
-/**
- * 
- */
+
+
 UCLASS(Abstract)
 class CRASH_API UProjectileAttack : public UAttackAbility
 {
@@ -38,5 +37,7 @@ private:
 	UFUNCTION()
 	void OnGameplayReceivedFireProjectile(FGameplayEventData Payload);
 	virtual void SpawnProjectile();
+
+	virtual void OnGameplayReceivedDamageEvent(FGameplayEventData Payload) override;
 	
 };

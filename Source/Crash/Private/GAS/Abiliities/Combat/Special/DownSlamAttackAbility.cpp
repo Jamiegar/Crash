@@ -33,6 +33,8 @@ void UDownSlamAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 	FOnMontageEnded OnMontageEnded = FOnMontageEnded::CreateUObject(this, &UDownSlamAttackAbility::OnAttackMontageFinished);
 	PlayAnimationMontageToOwningActor(AttackMontage, OnMontageEnded);
+
+	PlaySoundAtOwnerLocation(DownSlamSoundData.BuildUpSoundEffect);
 }
 
 void UDownSlamAttackAbility::OnEventPauseMontage(FGameplayEventData Payload)
@@ -58,6 +60,7 @@ void UDownSlamAttackAbility::OnEventGrounded(FGameplayEventData Payload)
 		AnimInstance->Montage_Resume(AttackMontage);
 	}
 
+	PlaySoundAtOwnerLocation(DownSlamSoundData.GroundSlamSoundEffect);
 	WaitForDamageEffect();
 }
 

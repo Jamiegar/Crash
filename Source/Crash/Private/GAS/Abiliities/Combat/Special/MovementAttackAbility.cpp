@@ -23,6 +23,7 @@ void UMovementAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	FOnMontageEnded Delegate = FOnMontageEnded::CreateUObject(this, &UMovementAttackAbility::OnMovementMontageEnded);
 	PlayAnimationMontageToOwningActor(AttackMontage, Delegate);
 
+	PlayMissedAttackSound();
 	WaitForDamageEffect();
 }
 
@@ -35,4 +36,5 @@ void UMovementAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Pa
 {
 	Super::OnGameplayReceivedDamageEvent(Payload);
 	WaitForHitStopEndAndApplyKnockback(Payload);
+	PlayContactHitAttackSound();
 }

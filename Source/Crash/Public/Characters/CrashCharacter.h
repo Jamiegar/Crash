@@ -22,6 +22,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCharacterKnockOut);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnKillCharacter);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFallingDown);
 
+USTRUCT(Blueprintable)
+struct FCharacterAudioData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* CharacterDeathEffect;
+};
+
+
 USTRUCT(BlueprintType, Blueprintable)
 struct FCharacterUIInfo
 {
@@ -47,8 +57,7 @@ public:
 UCLASS(Abstract)
 class CRASH_API ACrashCharacter : public ACharacter, public IAbilitySystemInterface, public ICombatAbilities
 {
-
-private:
+	
 	GENERATED_BODY()
 
 public:
@@ -64,6 +73,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Kill")
 	void KillCharacter();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	FCharacterAudioData CharacterAudioData;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanMove = true;
 	

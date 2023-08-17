@@ -5,6 +5,7 @@
 #include "Characters/CrashCharacter.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "GAS/Abiliities/Combat/Damage/Data/KnockbackData.h"
+#include "Kismet/GameplayStatics.h"
 
 UBasicAttack::UBasicAttack()
 {
@@ -12,7 +13,8 @@ UBasicAttack::UBasicAttack()
 		(TEXT("/Script/Crash.KnockbackData'/Game/Blueprints/GAS/Abilities/Combat/Data/KnockbackData/DA_DefaultKnockback.DA_DefaultKnockback'"));
 
 	KnockbackData = DefaultKnockbackData.Object;
-	KnockbackScaling = 15;
+	KnockbackScaling = 5;
+	AbilityDamage = 2.5;
 }
 
 void UBasicAttack::PostInitProperties()
@@ -35,7 +37,8 @@ void UBasicAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	FOnMontageEnded Delegate = FOnMontageEnded::CreateUObject(this, &UBasicAttack::OnMontageFinished);
 	PlayAnimationMontageToOwningActor(AttackMontage, Delegate);
-
+	
+	PlayMissedAttackSound();
 	WaitForDamageEffect(); //Async task is created and calls OnGameplayReceivedDamageEvent when event is received
 }
 
@@ -55,8 +58,9 @@ void UBasicAttack::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted)
 
 void UBasicAttack::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
-	
 	Super::OnGameplayReceivedDamageEvent(Payload);
 	WaitForHitStopEndAndApplyKnockback(Payload);
+
+	PlayContactHitAttackSound();
 }
 

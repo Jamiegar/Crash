@@ -46,6 +46,7 @@ void UChargeAttackAbility::OnAttackMontagePaused(FGameplayEventData Payload)
 	if(UAnimInstance* AnimInstance = GetActorInfo().SkeletalMeshComponent->GetAnimInstance())
 	{
 		AnimInstance->Montage_Pause(AttackMontage);
+		PlaySoundAtOwnerLocation(ChargeAttackSoundData.ChargeStartSoundEffect);
 	}
 }
 
@@ -66,7 +67,8 @@ void UChargeAttackAbility::OnAbilityInputRelease(float Duration)
 		AnimInstance->Montage_Resume(AttackMontage);
 	}
 	GetWorld()->GetTimerManager().ClearTimer(AbilityMaxDurationTimer);
-	
+
+	PlayMissedAttackSound();
 	WaitForDamageEffect();
 }
 
@@ -74,6 +76,7 @@ void UChargeAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payl
 {
 	Super::OnGameplayReceivedDamageEvent(Payload);
 	WaitForHitStopEndAndApplyKnockback(Payload);
+	PlayContactHitAttackSound();
 }
 
 void UChargeAttackAbility::OnMaxAbilityDuration()

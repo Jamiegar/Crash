@@ -49,6 +49,7 @@ void UStunAbility::OnReceivedStunData(FGameplayEventData Payload)
 	{
 		TargetCharacter->GetCharacterMovement()->SetMovementMode(MOVE_None);
 		TargetCharacter->bIsStuned = true;
+		StartingMeshPosition = TargetCharacter->GetMesh()->GetRelativeLocation();
 
 
 		FOnTimelineFloat TimelineFloat;
@@ -68,6 +69,7 @@ void UStunAbility::OnStunDurationFinished()
 {
 	TargetCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	TargetCharacter->bIsStuned = false;
+	TargetCharacter->GetMesh()->SetRelativeLocation(StartingMeshPosition);
 
 	UTimelineComponent* Timeline = TargetCharacter->GetTimelineComponent();
 	Timeline->Deactivate();

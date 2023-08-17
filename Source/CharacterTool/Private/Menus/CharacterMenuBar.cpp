@@ -4,6 +4,8 @@
 #include "Menus/CharacterMenuBar.h"
 #include "AssetToolsModule.h"
 #include "ClassViewerModule.h"
+#include "ContentBrowserModule.h"
+#include "IContentBrowserSingleton.h"
 #include "PropertyCustomizationHelpers.h"
 #include "SlateOptMacros.h"
 #include "Characters/CrashPlayerCharacter.h"
@@ -49,18 +51,6 @@ void SCharacterMenuBar::Construct(const FArguments& InArgs)
 			.Text(FText::FromString("Create New Character"))
 			.OnClicked(FOnClicked::CreateSP(this, &SCharacterMenuBar::OnCreateCharacterButtonClicked))
 		]
-		/*+SHorizontalBox::Slot()
-		.AutoWidth().VAlign(VAlign_Top) .HAlign(HAlign_Center)
-		[
-			SNew(SObjectPropertyEntryBox)
-			.DisplayBrowse(true)
-			.DisplayThumbnail(true)
-			.EnableContentPicker(true)
-			.AllowedClass(USkeletalMesh::StaticClass())
-			.OnObjectChanged(FOnSetObject::CreateSP(this, &SCharacterMenuBar::OnPropertyValueChanged))
-			.ThumbnailPool(AssetThumbnailPool)
-			.ObjectPath("/Script/Engine.SkeletalMesh'/Game/Assets/PolygonFantasyRivals/Meshes/Characters/SK_Character_SpiritDemon.SK_Character_SpiritDemon'")
-		]*/
 	];
 	
 }
@@ -70,7 +60,13 @@ FReply SCharacterMenuBar::OnCreateNewAbilityButtonClicked()
 	const FAssetToolsModule& ToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
 	
 	UCrashAbilityFactory* AbilityFactory = NewObject<UCrashAbilityFactory>();
-	static_cast<UAssetToolsImpl&>(ToolsModule.Get()).CreateAssetWithDialog(UCrashGameplayAbility::StaticClass(), AbilityFactory);
+	UAssetToolsImpl& AssetToolsImpl = static_cast<UAssetToolsImpl&>(ToolsModule.Get());
+	UObject* CreatedObject = AssetToolsImpl.CreateAssetWithDialog(UCrashGameplayAbility::StaticClass(), AbilityFactory);
+
+	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+	TArray<UObject*> Objects;
+	Objects.Add(CreatedObject);
+	ContentBrowserModule.Get().SyncBrowserToAssets(Objects, false, true, FName(), true);
 	
 	return FReply::Handled();
 }
@@ -81,7 +77,13 @@ FReply SCharacterMenuBar::OnCreateCharacterButtonClicked()
 	const FAssetToolsModule& ToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
 
 	UCrashCharacterFactory* CharacterFactory = NewObject<UCrashCharacterFactory>();
-	static_cast<UAssetToolsImpl&>(ToolsModule.Get()).CreateAssetWithDialog(ACrashPlayerCharacter::StaticClass(), CharacterFactory);
+	UAssetToolsImpl& AssetToolsImpl = static_cast<UAssetToolsImpl&>(ToolsModule.Get());
+	UObject* CreatedObject = AssetToolsImpl.CreateAssetWithDialog(ACrashPlayerCharacter::StaticClass(), CharacterFactory);
+
+	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+	TArray<UObject*> Objects;
+	Objects.Add(CreatedObject);
+	ContentBrowserModule.Get().SyncBrowserToAssets(Objects, false, true, FName(), true);
 	
 	return FReply::Handled();
 }
@@ -121,9 +123,6 @@ void SCharacterMenuBar::OnClassPicked(UClass* SelectedClass)
 }
 
 
-void SCharacterMenuBar::OnPropertyValueChanged(const FAssetData& AssetData)
-{
-	
-}
+
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

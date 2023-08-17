@@ -30,9 +30,7 @@ public:
 private:
 	TSharedPtr<STextBlock> CharacterTextBox;
 	TSharedPtr<FAssetThumbnailPool> AssetThumbnailPool;
-
 	
-	void OnPropertyValueChanged(const FAssetData& AssetData);
 };
 
 

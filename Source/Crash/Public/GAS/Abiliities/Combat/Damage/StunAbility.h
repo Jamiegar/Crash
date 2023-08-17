@@ -28,19 +28,22 @@ public:
 
 private:
 	UPROPERTY()
+	ACrashCharacter* TargetCharacter;
+	
+	UPROPERTY()
 	UAbilityTask_WaitGameplayEvent* AsyncStunDataEvent;
-
-	UFUNCTION()
-	void OnReceivedStunData(FGameplayEventData Payload);
 
 	UPROPERTY()
 	UAbilityTask_WaitDelay* AsyncStunDuration;
 
+	UPROPERTY()
+	FVector StartingMeshPosition;
+	
+	UFUNCTION()
+	void OnReceivedStunData(FGameplayEventData Payload);
+	
 	UFUNCTION()
 	void OnStunDurationFinished();
-
-	UPROPERTY()
-	ACrashCharacter* TargetCharacter;
 
 	UFUNCTION()
 	void TimelineUpdate(float interpolatedValue);

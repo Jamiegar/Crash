@@ -33,6 +33,7 @@ void UProjectileAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	FOnMontageEnded Delegate;
 	Delegate.BindUObject(this, &UProjectileAttack::OnMontageFinished);
 	PlayAnimationMontageToOwningActor(ProjectileAttackMontage, Delegate);
+	
 }
 
 void UProjectileAttack::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted)
@@ -43,6 +44,7 @@ void UProjectileAttack::OnMontageFinished(UAnimMontage* Montage, bool bInterrupt
 void UProjectileAttack::OnGameplayReceivedFireProjectile(FGameplayEventData Payload)
 {
 	SpawnProjectile();
+	PlayMissedAttackSound();
 }
 
 void UProjectileAttack::SpawnProjectile()
@@ -60,10 +62,18 @@ void UProjectileAttack::SpawnProjectile()
 		FActorSpawnParameters SpawnInfo;
 		SpawnInfo.Instigator = Cast<APawn>(GetActorInfo().OwnerActor.Get());
 
-		if(AProjectile* ProjectileObj = GetWorld()->SpawnActor<AProjectile>(Projectile, Location, Rotation, SpawnInfo))
-			ProjectileObj->SetDamagingEffectHandle(MakeOutgoingGameplayEffectSpec(UDamageBasicInstant::StaticClass()));
+		AProjectile* ProjectileObj = GetWorld()->SpawnActor<AProjectile>(Projectile, Location, Rotation, SpawnInfo);
 		
+		WaitForDamageEffect();
 	}
+}
+
+
+
+void UProjectileAttack::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
+{
+	Super::OnGameplayReceivedDamageEvent(Payload);
+	WaitForHitStopEndAndApplyKnockback(Payload);
 }
 
 

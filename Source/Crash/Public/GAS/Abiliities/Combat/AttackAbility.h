@@ -12,6 +12,19 @@ class UKnockbackData;
 class UStunAbilityData;
 class UAbilityTask_WaitGameplayEvent;
 
+USTRUCT(Blueprintable)
+struct FAttackAbilitySoundData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* MissedAttackSound;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sound")
+	USoundBase* ContactHitSound; 
+};
+
+
 UCLASS(Abstract)
 class CRASH_API UAttackAbility : public UCrashGameplayAbility
 {
@@ -40,6 +53,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Knockback")
 	UKnockbackData* KnockbackData;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	FAttackAbilitySoundData SoundData;
+	
 	UPROPERTY()
 	FGameplayEventData PayLoadEventData;
 	
@@ -79,4 +95,11 @@ protected:
 
 	UFUNCTION()
 	virtual void OnHitStopEndApplyKnockback();
+
+	
+	virtual void PlayMissedAttackSound();
+	virtual void PlayContactHitAttackSound();
+	virtual UAudioComponent* PlaySoundAtOwnerLocation(USoundBase* Sound);
+
+	
 };

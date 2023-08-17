@@ -14,7 +14,6 @@ UDownBasic::UDownBasic()
 		(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/Characters/Animation/Montages/BasicCombat/AnimMon_BasicDownAttack.AnimMon_BasicDownAttack'"));
 
 	AttackMontage = Montage.Object;
-	AbilityDamage = 5;
 
 	static ConstructorHelpers::FObjectFinder<UKnockbackData> DownBasicKnockbackData
 		(TEXT("/Script/Crash.KnockbackData'/Game/Blueprints/GAS/Abilities/Combat/Data/KnockbackData/DA_BasicDownKnockback.DA_BasicDownKnockback'"));

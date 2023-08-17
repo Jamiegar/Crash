@@ -18,6 +18,8 @@ UMiddleBasic::UMiddleBasic()
 		(TEXT("/Script/Crash.KnockbackData'/Game/Blueprints/GAS/Abilities/Combat/Data/KnockbackData/DA_BasicMiddleKnockback.DA_BasicMiddleKnockback'"));
 
 	KnockbackData = MiddleBasicKnockbackData.Object;
+	
+	
 }
 
 void UMiddleBasic::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

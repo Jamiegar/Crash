@@ -19,7 +19,7 @@ class CRASH_API UCameraSubsystem : public UWorldSubsystem
 private:
 	UPROPERTY(BlueprintGetter=GetCamera)
 	ACrashCamera* CameraActor = nullptr;
-
+	
 	UPROPERTY()
 	TArray<const ACharacter*> RegisteredCharacters;
 	
@@ -37,4 +37,7 @@ public:
 	void RegisterPlayerToCamera(const ACharacter* Character);
 	
 	TArray<const ACharacter*>& GetRegisteredCharacters() { return RegisteredCharacters; }
+
+	UFUNCTION(BlueprintCallable, Category="Camera Shake")
+	void ApplyCameraShake(float Trauma, float Decay = 1.3f, float TraumaMultiplier = 5, float TraumaMagnitude = 10.0f, float TraumaRotationalMagnitude = 0.7f, float TraumaDepthMagnitude = 0.0f);
 };
