@@ -46,6 +46,12 @@ void ACrashGameModeBase::BeginPlay()
 	OnGameSetupCompleted.ExecuteIfBound();
 
 	GameSetUp();
+
+	for (const auto Character : ActiveCharacters)
+	{
+		Character->OnCharacterDeath.AddUniqueDynamic(this, &ACrashGameModeBase::OnCharacterDeath);
+		Character->OnCharacterKnockedOut.AddUniqueDynamic(this, &ACrashGameModeBase::OnCharacterKO);
+	}
 }
 
 UClass* ACrashGameModeBase::GetDefaultPawnClassForController_Implementation(AController* InController)
@@ -71,5 +77,34 @@ void ACrashGameModeBase::HandleStartingNewPlayer_Implementation(APlayerControlle
 	{
 		ActiveCharacters.Add(PlayerPawn);
 		PlayerPawn->InitializePlayerCharacter();
+	}
+}
+
+void ACrashGameModeBase::OnCharacterDeath()
+{
+	for (const auto Character : ActiveCharacters)
+	{
+		Character->ApplyDynamicForceFeedback(1, 1.0f);
+	}
+	
+}
+
+void ACrashGameModeBase::OnCharacterKO(ACrashCharacter* KnockedOutCharacter)
+{
+	if(KnockedOutCharacter != ActiveCharacters[0])
+	{
+		if(APlayerController* Controller = ActiveCharacters[0]->GetCrashCharacterPlayerController())
+			OnCharacterKnockedOut(Controller);
+	}
+	else
+	{
+		if(APlayerController* Controller = ActiveCharacters[1]->GetCrashCharacterPlayerController())
+			OnCharacterKnockedOut(Controller);
+	}
+
+	for (const auto Character : ActiveCharacters)
+	{
+		Character->bCanMove = false;
+		
 	}
 }

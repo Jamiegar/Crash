@@ -9,6 +9,7 @@
 #include "GAS/CrashAbilitySystemComponent.h"
 #include "GAS/CrashAttributeSet.h"
 #include "Interfaces/CombatAbilities.h"
+#include "Interfaces/CrashController.h"
 #include "CrashCharacter.generated.h"
 
 class UCharacterUIDataInfo;
@@ -18,7 +19,7 @@ class UKnockbackComponent;
 class UCombatComponent;
 class UCrashGameplayAbility;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCharacterKnockOut);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterKnockOut, ACrashCharacter*, KnockedOutCharacter);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnKillCharacter);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFallingDown);
 
@@ -55,9 +56,8 @@ public:
 };
 
 UCLASS(Abstract)
-class CRASH_API ACrashCharacter : public ACharacter, public IAbilitySystemInterface, public ICombatAbilities
+class CRASH_API ACrashCharacter : public ACharacter, public IAbilitySystemInterface, public ICombatAbilities, public ICrashController
 {
-	
 	GENERATED_BODY()
 
 public:
@@ -162,6 +162,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void FaceActor(const AActor* TargetActor);
+
+	//////////////////////////////////////////////////////////////////////////
+	// ICrashController
+	//////////////////////////////////////////////////////////////////////////
+
+	UFUNCTION(BlueprintCallable, Category="Controller")
+	virtual APlayerController* GetCrashCharacterPlayerController() override;
+	
+	virtual void ApplyDynamicForceFeedback(float Intensity, float Duration, bool AffectsLeftLarge = true, bool AffectsLeftSmall = true, bool AffectsRightLarge= true, bool AffectsRightSmall = true) override;
 	
 	//////////////////////////////////////////////////////////////////////////
 	// ICombatInterface

@@ -11,7 +11,6 @@ UKnockbackEffect::UKnockbackEffect()
 	DurationPolicy = EGameplayEffectDurationType::Infinite;
 
 	InheritableGameplayEffectTags.AddTag(FGameplayTag::RequestGameplayTag("Player.Damaged.Knockback"));
-	RemovalTagRequirements.RequireTags.AddTag(FGameplayTag::RequestGameplayTag("Player.State.Invincible"));
 	
 	FGameplayEffectCue KnockbackCue;
 	FGameplayTagContainer KnockbackTagContainer;

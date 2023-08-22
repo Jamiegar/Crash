@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "CrashGlobalFunctions.generated.h"
 
+class ACrashPlayerCharacter;
 /**
  * 
  */
@@ -16,5 +17,9 @@ class CRASH_API UCrashGlobalFunctions : public UBlueprintFunctionLibrary
 
 public:
 
-	static void CreateObjectInContentBrowser();
+	/*UFUNCTION(BlueprintCallable)
+	TArray<TSubclassOf<ACrashPlayerCharacter>> GetAllCharactersInContentBrowser(); */
+
+
+	
 };

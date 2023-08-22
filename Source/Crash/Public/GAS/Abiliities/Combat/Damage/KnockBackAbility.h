@@ -62,24 +62,24 @@ private:
 	UPROPERTY()
 	UAudioComponent* KnockbackAudio;
 
-	UFUNCTION()
-	void OnReceivedKnockbackData(FGameplayEventData Payload);
-
 	UPROPERTY()
 	UAbilityTask_WaitGameplayEvent* AsyncEventWaitUntilGrounded;
-
-	UFUNCTION()
-	void OnCharacterGrounded(FGameplayEventData Payload);
 
 	UPROPERTY()
 	UAbilityTask_WaitDelay* WaitAsyncKncokbackEnd;
 
+	UFUNCTION()
+	void OnReceivedKnockbackData(FGameplayEventData Payload);
+
+	UFUNCTION()
+	void OnCharacterGrounded(FGameplayEventData Payload);
+	
 	UFUNCTION()
 	void OnKnockbackGroundedFinished();
 
 	UFUNCTION()
 	void GetupMontageFinished(UAnimMontage* Montage, bool bInterrupted);
 
-	void ApplyInvincibility();
-
+	UFUNCTION()
+	void OnCharacterFallingDown();
 };

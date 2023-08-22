@@ -58,13 +58,22 @@ void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 {
 	PayLoadEventData = Payload;
 
+	ACrashCharacter* OwnerCharacter = CastChecked<ACrashCharacter>(GetActorInfo().OwnerActor);
 	ACrashCharacter* TargetCharacter = Cast<ACrashCharacter>(Payload.Target);
+
 	if(!TargetCharacter)
 		return;
 
+	if(TargetCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Player.State.Invincible")))
+		return;
+
+	
 	UCameraSubsystem* CameraSubsystem = GetWorld()->GetSubsystem<UCameraSubsystem>();
 	const float Trauma = (AbilityDamage / 20) * 3.5;
 	CameraSubsystem->ApplyCameraShake(Trauma, 2, 400, 75, 0.5, 1.5);
+
+	OwnerCharacter->ApplyDynamicForceFeedback(1.0f, 0.2f);
+	TargetCharacter->ApplyDynamicForceFeedback(1.0f, 0.2f);
 	
 	TargetCharacter->FaceActor(GetActorInfo().OwnerActor.Get());
 
@@ -100,6 +109,14 @@ bool UAttackAbility::DoesTargetHaveCounterAttack(ACrashCharacter* Target)
 
 void UAttackAbility::ApplyKnockbackInstantToTarget(FGameplayEventData Payload)
 {
+	const ACrashCharacter* TargetCharacter = Cast<ACrashCharacter>(Payload.Target);
+
+	if(!TargetCharacter)
+		return;
+	
+	if(TargetCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Player.State.Invincible")))
+		return;
+	
 	PayLoadEventData = Payload;
 	
 	const FGameplayEffectSpecHandle Handle = MakeEffectSpecHandleFromAbility(UKnockbackCalculationEffect::StaticClass());

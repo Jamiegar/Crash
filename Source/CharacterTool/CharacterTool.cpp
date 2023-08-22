@@ -84,7 +84,7 @@ void FCharacterTool::RegisterMenus()
 	{
 		UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
 		{
-			FToolMenuSection& Section = Menu->FindOrAddSection("WindowLayout");
+			FToolMenuSection& Section = Menu->FindOrAddSection("Window");
 			Section.AddMenuEntryWithCommandList(FCharacterCreationToolCommands::Get().OpenToolWindow, ToolCommands);
 		}
 	}

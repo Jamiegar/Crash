@@ -16,6 +16,7 @@
 #include "GAS/Abiliities/Combat/Basic/SlideAbility.h"
 #include "GAS/Abiliities/Combat/Basic/UpBasic.h"
 #include "GAS/Abiliities/Movement/JumpAbility.h"
+#include "GAS/Abiliities/Movement/PhasePlatform.h"
 #include "InterfacesUI/PlayerUILocator.h"
 
 
@@ -31,10 +32,10 @@ void FAbilityInputMap::LoadDefaults()
 	UInputAction* BlockInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_Block.IA_Block"));
 	UInputAction* SlideInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/CombatInputActions/IA_Slide.IA_Slide"));
 	UInputAction* JumpInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/MovementInput/IA_Jump.IA_Jump"));
+	UInputAction* DownMovementInput = LoadObject<UInputAction>(nullptr, TEXT("/Game/Blueprints/Characters/Input/MovementInput/IA_DownMovement.IA_DownMovement"));
 	
 
 	// --- Find Default Abilities ------------------------------------
-
 	const UComboBasic* ComboBasic = LoadObject<UComboBasic>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.ComboBasic'"));
 	const UUpBasic* BasicUpAttack = LoadObject<UUpBasic>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.UpBasic'"));
 	const UMiddleBasic* BasicMiddleAttack = LoadObject<UMiddleBasic>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.MiddleBasic'"));
@@ -42,6 +43,7 @@ void FAbilityInputMap::LoadDefaults()
 	const UBlockAbility* BlockAbility = LoadObject<UBlockAbility>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.BlockAbility'"));
 	const USlideAbility* SlideAbility = LoadObject<USlideAbility>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.SlideAbility'"));
 	const UJumpAbility* JumpAbility = LoadObject<UJumpAbility>(nullptr, TEXT("/Script/CoreUObject.Class'/Script/Crash.JumpAbility'"));
+	const UPhasePlatform* PhasePlatformAbility = LoadObject<UPhasePlatform>(nullptr, TEXT("/Script/Crash.PhasePlatform"));
 
 	
 	// --- Default Input Ability Actions ------------------------------
@@ -53,6 +55,7 @@ void FAbilityInputMap::LoadDefaults()
 	AbilityInputMappingLayout.Add(BasicDownInput, BasicDownAttack->StaticClass());
 	AbilityInputMappingLayout.Add(SlideInput, SlideAbility->StaticClass());
 	AbilityInputMappingLayout.Add(BasicNeutralInput, ComboBasic->StaticClass());
+	AbilityInputMappingLayout.Add(DownMovementInput, PhasePlatformAbility->StaticClass());
 }
 #undef LOCTEXT_NAMESPACE
 

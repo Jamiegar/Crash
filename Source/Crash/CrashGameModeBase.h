@@ -35,6 +35,14 @@ protected:
 	
 	UFUNCTION(BlueprintImplementableEvent, Category="Initialisation")
 	void GameSetUp();
+
+	UFUNCTION(BlueprintImplementableEvent, Category="Character KnockedOut")
+	void OnCharacterKnockedOut(APlayerController* WinningCharacter);
 	
+	UFUNCTION(Category="Characters")
+	void OnCharacterDeath();
+
+	UFUNCTION(Category="Characters")
+	void OnCharacterKO(ACrashCharacter* KnockedOutCharacter);
 	
 };

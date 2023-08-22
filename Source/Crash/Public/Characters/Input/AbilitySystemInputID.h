@@ -15,5 +15,6 @@ enum class EAbilityInputID
 	SpecialAttackMiddle,
 	SpecialAttackUp,
 	SpecialAttackDown,
-	SpecialAttack
+	SpecialAttack,
+	DownMovement
 };

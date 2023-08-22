@@ -18,6 +18,8 @@
 #include "GAS/Abiliities/Combat/AirAttackAbility.h"
 #include "GAS/Abiliities/Combat/Damage/DeathEffect.h"
 #include "GAS/Abiliities/Combat/Damage/RespawnAbility.h"
+#include "GAS/Abiliities/Movement/PhasePlatform.h"
+#include "GAS/Effects/DefaultStartingAttributeEffect.h"
 #include "GAS/Effects/Damaging/DamageLivesInstant.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -48,15 +50,12 @@ ACrashCharacter::ACrashCharacter()
 	CrashAttributes = CreateDefaultSubobject<UCrashAttributeSet>("Default Attributes");
 	TimelineComponent = CreateDefaultSubobject<UTimelineComponent>("Timeline");
 
-	static ConstructorHelpers::FObjectFinder<UGameplayEffect> AttributeSetup
-		(TEXT("/Game/Blueprints/GAS/Effects/GE_DefaultAttributeEffect.GE_DefaultAttributeEffect"));
-	
-	DefaultAttributeEffect = AttributeSetup.Object->StaticClass();
-
 	static ConstructorHelpers::FObjectFinder<USoundBase> DefaultDeathSound
 		(TEXT("/Script/MetasoundEngine.MetaSoundSource'/Game/Blueprints/MetaSounds/CharacterDeath/MS_CharacterDeath.MS_CharacterDeath'"));
 
 	CharacterAudioData.CharacterDeathEffect = DefaultDeathSound.Object;
+
+	DefaultAttributeEffect = UDefaultStartingAttributeEffect::StaticClass();
 	
 	GetCapsuleComponent()->SetCapsuleRadius(50.f);
 	
@@ -72,23 +71,37 @@ void ACrashCharacter::SetDefaultMesh() const
 	if(GetMesh()->GetSkeletalMeshAsset() == nullptr)
 	{
 		static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMesh //Gets the skeletal mesh from file path
-			(TEXT("/Script/Engine.SkeletalMesh'/Game/Assets/PolygonFantasyRivals/Meshes/Characters/SK_Character_SpiritDemon.SK_Character_SpiritDemon'"));
+			(TEXT("/Game/Assets/PolygonFantasyRivals/Meshes/Characters/SK_Character_SpiritDemon.SK_Character_SpiritDemon"));
 
-		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> AnimObject //Gets the Animation BP from file path
-			(TEXT("/Script/Engine.AnimBlueprint'/Game/Blueprints/Characters/Animation/AnimBP_CrashCharacter.AnimBP_CrashCharacter'"));
-
-		if(!SkeletalMesh.Succeeded() || !AnimObject.Succeeded()) 
+		if(SkeletalMesh.Succeeded()) 
 		{
-			UE_LOG(LogTemp, Error, TEXT("Default Crash Mesh and Animation Could not be found"));
-			return;
+			//Set mesh and animation values and initialize default position and rotation of mesh 
+			GetMesh()->SetSkeletalMeshAsset(SkeletalMesh.Object);
+			GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
+			GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 		}
-
-		//Set mesh and animation values and initialize default position and rotation of mesh 
-		GetMesh()->SetSkeletalMeshAsset(SkeletalMesh.Object);
-		GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
-		GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
-		GetMesh()->SetAnimInstanceClass(AnimObject.Object->GeneratedClass);
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Default Crash Mesh could not be found"));
+		}
 	}
+
+	/*if(GetMesh()->GetAnimClass() == nullptr)
+	{
+		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> AnimObject //Gets the Animation BP from file path
+			(TEXT("/Game/Blueprints/Characters/Animation/AnimBP_CrashCharacter.AnimBP_CrashCharacter"));
+
+		if(AnimObject.Succeeded())
+		{
+			
+			GetMesh()->SetAnimInstanceClass(AnimObject.Object->GeneratedClass);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Default Crash Anim Class could not be found"));
+		}
+	}*/
+	
 }
 
 void ACrashCharacter::AddDefaultAbilities()
@@ -97,6 +110,7 @@ void ACrashCharacter::AddDefaultAbilities()
 	DefaultAbilities.Add(UBlockAbility::StaticClass());
 	DefaultAbilities.Add(USlideAbility::StaticClass());
 	DefaultAbilities.Add(UAirAttackAbility::StaticClass());
+	DefaultAbilities.Add(UPhasePlatform::StaticClass());
 }
 
 void ACrashCharacter::CheckFallingDown()
@@ -135,6 +149,7 @@ void ACrashCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint
 	{
 	case MOVE_Falling:
 		OnStartedFalling();
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 		break;
 
 		default:
@@ -158,10 +173,14 @@ void ACrashCharacter::Landed(const FHitResult& Hit)
 	ApplyEffectToCrashCharacter(UGroundedEffect::StaticClass());
 	bIsKnockedBack = false;
 	bIsFallingDown = false;
+	GetWorldTimerManager().ClearTimer(FallingDownTimerHandle);
 
 	const FGameplayTag LandedTag = FGameplayTag::RequestGameplayTag("Player.State.Grounded");
 	FGameplayEventData Data;
 	GetAbilitySystemComponent()->HandleGameplayEvent(LandedTag, &Data);
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	
 }
 
 void ACrashCharacter::SetUpDefaultMovementValues()
@@ -239,6 +258,17 @@ void ACrashCharacter::FaceActor(const AActor* TargetActor)
 	SetActorRotation(FRotator(0, LookAtRotation.Yaw, 0));
 }
 
+APlayerController* ACrashCharacter::GetCrashCharacterPlayerController()
+{
+	return Cast<APlayerController>(GetController());
+}
+
+void ACrashCharacter::ApplyDynamicForceFeedback(float Intensity, float Duration, bool AffectsLeftLarge, bool AffectsLeftSmall, bool AffectsRightLarge, bool AffectsRightSmall)
+{
+	if(APlayerController* CrashController = GetCrashCharacterPlayerController())
+		CrashController->PlayDynamicForceFeedback(Intensity, Duration, AffectsLeftLarge, AffectsLeftSmall, AffectsRightLarge, AffectsRightSmall);
+}
+
 void ACrashCharacter::KillCharacter()
 {
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
@@ -259,7 +289,7 @@ void ACrashCharacter::KillCharacter()
 	
 	if(GetCrashAttributeSet()->GetLives() <= 0)
 	{
-		OnCharacterKnockedOut.Broadcast();
+		OnCharacterKnockedOut.Broadcast(this);
 		UE_LOG(LogTemp, Warning, TEXT("Character KO"));
 		return;
 	}

@@ -6,5 +6,7 @@
 UJumpExhaustedEffect::UJumpExhaustedEffect()
 {
 	DurationPolicy = EGameplayEffectDurationType::Infinite;
+
+	InheritableGameplayEffectTags.AddTag(FGameplayTag::RequestGameplayTag("Player.MovementAction.JumpExhausted"));
 	InheritableOwnedTagsContainer.AddTag(FGameplayTag::RequestGameplayTag("Player.MovementAction.JumpExhausted"));
 }
