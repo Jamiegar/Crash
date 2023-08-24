@@ -29,7 +29,8 @@ void UAnimNofifyState_DamageWindow::NotifyBegin(USkeletalMeshComponent* MeshComp
 	if(DamagingVFX)
 	{
 		const FVector RightVector = UKismetMathLibrary::GetRightVector(MeshComp->GetComponentRotation());
-		NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(MeshComp->GetWorld(), DamagingVFX, AbsoluteSpawnLocation, UKismetMathLibrary::MakeRotFromX(RightVector));
+		NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(DamagingVFX, MeshComp->GetOwner()->GetRootComponent(), FName(),
+			AbsoluteSpawnLocation,UKismetMathLibrary::MakeRotFromX(RightVector), EAttachLocation::KeepWorldPosition, true);
 	}
 	
 	if(ICombatAbilities* CombatAbilities = Cast<ICombatAbilities>(MeshComp->GetOwner()))

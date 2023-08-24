@@ -20,7 +20,8 @@ void UMeleeHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Anim
 			if(Component->PerformDamageTrace(BoneNameTraceLocation) && ConfirmHitVFX != nullptr)
 			{
 				const FVector SpawnLocation = MeshComp->GetBoneLocation(BoneNameTraceLocation);
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(MeshComp->GetOwner(), ConfirmHitVFX, SpawnLocation);
+				UNiagaraFunctionLibrary::SpawnSystemAttached(ConfirmHitVFX, MeshComp->GetOwner()->GetRootComponent(), FName(), SpawnLocation, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition, true);
+				//UNiagaraFunctionLibrary::SpawnSystemAtLocation(MeshComp->GetOwner(), ConfirmHitVFX, SpawnLocation);
 			}
 		}
 		

@@ -64,7 +64,7 @@ void UAttackAbility::OnGameplayReceivedDamageEvent(FGameplayEventData Payload)
 	if(!TargetCharacter)
 		return;
 
-	if(TargetCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Player.State.Invincible")))
+	if(TargetCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Player.State.Invincible")) && !DoesTargetHaveCounterAttack(TargetCharacter))
 		return;
 
 	
