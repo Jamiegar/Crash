@@ -9,6 +9,7 @@
 #include "InputMappingContext.h"
 #include "Characters/Input/InputAbilityMap.h"
 #include "Components/WidgetComponent.h"
+#include "Crash/CrashGameModeBase.h"
 #include "GAS/Abiliities/Combat/Basic/BlockAbility.h"
 #include "GAS/Abiliities/Combat/Basic/ComboBasic.h"
 #include "GAS/Abiliities/Combat/Basic/DownBasic.h"
@@ -18,6 +19,7 @@
 #include "GAS/Abiliities/Movement/JumpAbility.h"
 #include "GAS/Abiliities/Movement/PhasePlatform.h"
 #include "InterfacesUI/PlayerUILocator.h"
+#include "Kismet/GameplayStatics.h"
 
 
 #define LOCTEXT_NAMESPACE "FAbilityInputMap"
@@ -84,6 +86,11 @@ ACrashPlayerCharacter::ACrashPlayerCharacter()
 		(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/Characters/Input/MovementInput/IA_MovementLeftRight.IA_MovementLeftRight'"));
 
 	MovementAction = DefaultMovementAction.Object;
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> DefaultPauseAction
+		(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/Characters/Input/IA_Pause.IA_Pause'"));
+
+	PauseAction = DefaultPauseAction.Object;
 	
 	InputAbilityMap.LoadDefaults();
 	GiveInputMapAbilitiesToCharacter();
@@ -169,6 +176,21 @@ void ACrashPlayerCharacter::OnAbilityInputReleased(const FInputActionValue& Acti
 	
 }
 
+void ACrashPlayerCharacter::OnPausePressed()
+{
+	ACrashGameModeBase* GameMode = Cast<ACrashGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if(UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		//UnPause
+		GameMode->SetGamePause(false);
+	}
+	else
+	{
+		//Pause
+		GameMode->SetGamePause(true);
+	}
+}
+
 void ACrashPlayerCharacter::BindAbiltiesToInput(UCrashEnhancedInputComponent* CrashInputComponent)
 {
 	TArray<UInputAction*> AbilityInputActions;
@@ -201,6 +223,7 @@ void ACrashPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	if(UCrashEnhancedInputComponent* CrashInputComponent = CastChecked<UCrashEnhancedInputComponent>(PlayerInputComponent))
 	{
 		CrashInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ACrashPlayerCharacter::Move);
+		CrashInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &ACrashPlayerCharacter::OnPausePressed);
 		BindAbiltiesToInput(CrashInputComponent);
 	}
 }

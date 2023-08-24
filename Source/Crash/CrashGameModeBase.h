@@ -44,5 +44,9 @@ protected:
 
 	UFUNCTION(Category="Characters")
 	void OnCharacterKO(ACrashCharacter* KnockedOutCharacter);
+
+public:
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category="Pause")
+	void SetGamePause(bool IsPaused);
 	
 };

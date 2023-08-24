@@ -58,6 +58,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	UInputAction* MovementAction;
+
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	UInputAction* PauseAction;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	FAbilityInputMap InputAbilityMap;
@@ -75,6 +78,9 @@ protected:
 
 	UFUNCTION()
 	void OnAbilityInputReleased(const FInputActionValue& ActionValue, float ElapsedTime, float TriggeredTime, const UInputAction* SourceAction);
+
+	UFUNCTION()
+	void OnPausePressed();
 
 	void BindAbiltiesToInput(UCrashEnhancedInputComponent* CrashInputComponent);
 	void SendLocalInputToAbilityComponent(const EAbilityInputID InputID, bool bWasPressed = true);
