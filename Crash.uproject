@@ -35,6 +35,10 @@
 		{
 			"Name": "CharacterCreationTool",
 			"Enabled": false
+		},
+		{
+			"Name": "MovieRenderPipeline",
+			"Enabled": true
 		}
 	]
 }

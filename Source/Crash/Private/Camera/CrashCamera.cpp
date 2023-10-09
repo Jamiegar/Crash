@@ -89,7 +89,7 @@ void ACrashCamera::CameraMovement(float DeltaTime)
 	const FVector AverageLocation = CalculateAverageLocation(ActiveCharacters);
 	
 	FVector NewLocation = FMath::VInterpTo(PreviousLocation, AverageLocation, DeltaTime, CameraMoveSpeed); //Interps the Look at component to the new location
-	//NewLocation += CameraMovementOffset; //Adds an offset to the new location, as the character position is at the feet and so the average Location could be too low  
+	NewLocation += CameraMovementOffset; //Adds an offset to the new location, as the character position is at the feet and so the average Location could be too low  
 	
 	FVector OutMin;
 	FVector OutMax;
@@ -115,7 +115,7 @@ void ACrashCamera::CameraZoom(float DeltaTime)
 		for(int i = CharIdx + 1; i < ActiveCharacters.Num(); i++)
 		{
 			const ACharacter* NextCharacter = ActiveCharacters[i];
-
+			
 			float Distance = CurrentCharacter->GetDistanceTo(NextCharacter);
 			DistancesBetweenChar.Add(Distance);
 		}

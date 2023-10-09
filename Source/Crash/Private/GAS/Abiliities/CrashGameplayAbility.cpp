@@ -22,6 +22,7 @@ void UCrashGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActo
 
 bool UCrashGameplayAbility::CommitCrashAbility()
 {
+	
 	return CommitAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo());
 }
 
